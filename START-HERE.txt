@@ -1,0 +1,22 @@
+⚠️ IMPORTANT: SET UP YOUR API KEY FIRST! ⚠️
+
+Before running the app, you need to add your Gemini API key:
+
+1. Open the file: .env.local
+
+2. Replace this line:
+   GEMINI_API_KEY=PLACEHOLDER_API_KEY
+
+3. With your actual API key:
+   GEMINI_API_KEY=AIza...your_actual_key_here
+
+4. Get your API key from:
+   https://aistudio.google.com/app/apikey
+
+5. Then run:
+   npm run dev
+
+6. Open your browser to:
+   http://localhost:3000
+
+That's it! The app should now work perfectly.
