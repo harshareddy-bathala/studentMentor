@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat as GenAIChat } from '@google/genai';
-import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type SessionContext } from '../types';
+import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type SessionContext, type TeacherAlert } from '../types';
 import { generateMentorSystemInstruction } from '../utils/aiHelpers';
 
 interface ChatProps {
@@ -8,6 +8,7 @@ interface ChatProps {
   checkIns: DailyCheckIn[];
   activities: ActivityLog[];
   onAddActivity: (activity: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
+  onTriggerAlert?: (alert: Omit<TeacherAlert, 'id' | 'createdAt'>) => void;
 }
 
 const TypingIndicator: React.FC = () => (
@@ -18,7 +19,7 @@ const TypingIndicator: React.FC = () => (
   </div>
 );
 
-const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivity }) => {
+const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivity, onTriggerAlert }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -158,6 +159,11 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivit
           category: messageType.category,
           description: messageType.description,
         });
+
+        // Check if we should trigger a teacher alert
+        if ('shouldAlert' in messageType && messageType.shouldAlert && onTriggerAlert && 'alert' in messageType) {
+          onTriggerAlert(messageType.alert!);
+        }
       }
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -176,8 +182,77 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivit
     }
   };
 
-  const detectMessageType = (message: string): { type: ActivityLog['type'], category: string, description: string } | null => {
+  const detectMessageType = (message: string): { 
+    type: ActivityLog['type'], 
+    category: string, 
+    description: string,
+    shouldAlert?: boolean,
+    alert?: Omit<TeacherAlert, 'id' | 'createdAt'>
+  } | null => {
     const lowerMessage = message.toLowerCase();
+    
+    // Critical mental health keywords - trigger immediate alert
+    if (lowerMessage.includes('depressed') || lowerMessage.includes('hopeless') || 
+        lowerMessage.includes('can\'t cope') || lowerMessage.includes('give up')) {
+      return {
+        type: 'mental-health',
+        category: 'emotional-crisis',
+        description: 'Expressed serious emotional distress',
+        shouldAlert: true,
+        alert: {
+          studentId: profile.id,
+          studentName: profile.name,
+          alertType: 'mental-health',
+          severity: 'urgent',
+          title: 'Student Expressing Serious Emotional Distress',
+          description: `${profile.name} has used concerning language in chat that may indicate mental health crisis.`,
+          aiInsight: 'The student used language indicating potential depression or hopelessness. Immediate check-in recommended.',
+          suggestedActions: [
+            'Schedule immediate one-on-one conversation',
+            'Contact school counselor',
+            'Reach out to parents/guardians',
+            'Provide mental health resources'
+          ],
+          relatedData: {
+            recentCheckIns: checkIns.slice(0, 3),
+            recentActivities: activities.slice(0, 5),
+          },
+          status: 'new',
+        },
+      };
+    }
+    
+    // Academic struggle - ongoing pattern
+    if ((lowerMessage.includes('failing') || lowerMessage.includes('don\'t understand') || 
+         lowerMessage.includes('too hard') || lowerMessage.includes('can\'t do it')) &&
+        checkIns.filter(c => c.academicChallengesFaced).length >= 3) {
+      return {
+        type: 'academic',
+        category: 'struggling',
+        description: 'Expressed difficulty with coursework',
+        shouldAlert: true,
+        alert: {
+          studentId: profile.id,
+          studentName: profile.name,
+          alertType: 'academic-struggle',
+          severity: 'high',
+          title: 'Student Struggling with Academic Performance',
+          description: `${profile.name} has repeatedly mentioned academic difficulties and may need extra support.`,
+          aiInsight: 'Pattern detected: Student has expressed academic challenges in multiple check-ins and is seeking help.',
+          suggestedActions: [
+            'Arrange tutoring sessions',
+            'Review study methods and materials',
+            'Break down complex topics into smaller parts',
+            'Consider additional practice resources'
+          ],
+          relatedData: {
+            recentCheckIns: checkIns.slice(0, 5),
+            recentActivities: activities.filter(a => a.type === 'academic').slice(0, 5),
+          },
+          status: 'new',
+        },
+      };
+    }
     
     if (lowerMessage.includes('stress') || lowerMessage.includes('anxious') || lowerMessage.includes('worried')) {
       return {

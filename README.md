@@ -9,6 +9,9 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 - **Monitors Daily Progress**: Tracks student behavior across studies, sports, mental health, and social activities
 - **Provides Personalized Guidance**: Adapts communication style based on student's age, maturity level, and personality
 - **Supports Career Aspirations**: Guides students toward their dream careers with targeted advice
+- **Enables Peer Collaboration**: Connect with classmates and teachers for homework help and discussions
+- **Smart Task Management**: Track homework and upcoming tests with intelligent reminders
+- **AI-Powered Alerts**: Automatically notifies teachers when students need extra support
 - **Generates Teacher Reports**: Provides educators with detailed insights into student well-being and performance
 - **Ensures Holistic Development**: Balances academic excellence with mental health and physical fitness
 
@@ -18,13 +21,60 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 - Multi-step profile creation capturing:
   - Basic info (name, age, grade)
   - Academic subjects, goals, and learning style
-  - Career aspirations and dream job
-  - Interests and hobbies
+  - Career aspirations and dream job (editable anytime)
+  - Interests and hobbies (dynamic updates)
   - Sports and physical activities
   - Academic and personal challenges
   - Mental health considerations
+- **Note**: Personalization data is used by AI but NOT shown in dashboard
 
-### 2. **Intelligent Dashboard** 📊
+### 2. **Dynamic Goals Management** 🎯
+- **Current Goals**: Active focus areas
+- **Short-term Goals**: 3-6 month objectives
+- **Long-term Goals**: 1+ year aspirations
+- **Career Aspirations**: Updated as interests evolve
+- **Interests**: Add/remove hobbies anytime
+- All goals are editable from user profile menu
+
+### 3. **Homework & To-Do List** 📚
+- View all assigned homework from teachers
+- Filter by status: All, Pending, Completed
+- Sort by due date or priority
+- Priority levels: Low, Medium, High, Urgent
+- Mark as in-progress, completed, or submitted
+- Overdue warnings with visual indicators
+- Estimated time tracking
+- Subject and teacher information
+
+### 4. **Upcoming Tests & Exams** 📝
+- Complete test schedule from teachers
+- View tests by: Upcoming, Today, This Week, All
+- Test importance: Quiz, Unit Test, Midterm, Final, Board Exam
+- Syllabus topics for each test
+- Preparation status tracking
+- Study materials and resources
+- Personal notes for each test
+- Days-until countdown
+
+### 5. **Peer & Teacher Chat** 👥
+- Real-time messaging with classmates
+- Direct communication with teachers
+- Online status indicators
+- Message read receipts
+- Subject-specific teacher contacts
+- Conversation history
+- Unread message counters
+
+### 6. **AI Teacher Alerts** 🔔
+- Automatic detection of struggling students
+- Mental health crisis warnings
+- Academic difficulty patterns
+- Severity levels: Low, Medium, High, Urgent
+- AI-generated insights and recommendations
+- Suggested interventions
+- Beta version for teacher notification
+
+### 7. **Intelligent Dashboard** 📊
 - Real-time progress visualization
 - Mood trend analysis
 - Study hours tracking
@@ -32,8 +82,9 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 - Stress level monitoring
 - Recent activity feed
 - Achievement highlights
+- **Note**: Personal aspirations hidden from dashboard
 
-### 3. **Daily Check-In System** ✅
+### 8. **Daily Check-In System** ✅
 - Track mood and emotional state
 - Log sleep hours and energy levels
 - Record study sessions and subjects
@@ -41,19 +92,17 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 - Capture achievements and challenges
 - Build historical data for insights
 
-### 4. **Advanced AI Chat** 💬
+### 9. **Advanced AI Chat** 💬
 - Context-aware conversations using Gemini 2.0 Flash
 - Age-appropriate communication style
-- Personalized responses based on:
-  - Student profile (goals, challenges, interests)
-  - Recent check-ins and mood patterns
-  - Activity history
-  - Career aspirations
+- Personalized responses based on all profile data
+- Considers current goals, not hardcoded aspirations
 - Real-time streaming responses
 - Automatic activity logging
+- **AI Alert Triggers**: Detects when student needs teacher intervention
 - Quick prompt suggestions
 
-### 5. **Teacher Report Generation** 📄
+### 10. **Teacher Report Generation** 📄
 - Comprehensive student progress reports
 - Academic performance analysis
 - Mental health and well-being assessment
@@ -61,12 +110,6 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 - Behavioral insights
 - Actionable recommendations
 - Downloadable and printable reports
-
-### 6. **Smart Activity Logging** 📝
-- Automatic categorization of interactions
-- Sentiment analysis
-- Pattern detection
-- Historical tracking
 
 ## 🏗️ Technical Architecture
 
@@ -78,30 +121,38 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 
 ### Data Management
 - LocalStorage for client-side persistence
-- Comprehensive TypeScript interfaces
+- Comprehensive TypeScript interfaces (9+ models)
 - Real-time state management
 - Automatic data synchronization
 
 ### AI Integration
 - **Gemini 2.0 Flash Experimental** model
 - Dynamic system instruction generation
-- Context-aware prompting
+- Context-aware prompting with full student history
 - Streaming responses for better UX
+- Intelligent alert detection
 
 ## 📁 Project Structure
 
 ```
 student-mentor-ai/
 ├── components/
+│   ├── Login.tsx                # Authentication UI
 │   ├── Onboarding.tsx          # 6-step profile creation
 │   ├── Dashboard.tsx            # Progress visualization
-│   ├── Chat.tsx                 # AI mentor chat interface
+│   ├── GoalsEditor.tsx          # Dynamic goals management
+│   ├── HomeworkList.tsx         # Homework tracking
+│   ├── TestsList.tsx            # Test management
+│   ├── PeerChat.tsx             # Peer/teacher messaging
+│   ├── Chat.tsx                 # AI mentor with alerts
 │   ├── DailyCheckIn.tsx         # Daily progress tracker
+│   ├── TeacherAlerts.tsx        # Alert display
 │   └── TeacherReport.tsx        # Comprehensive reports
 ├── utils/
 │   └── aiHelpers.ts             # AI prompting & analytics
-├── types.ts                     # TypeScript interfaces
-├── App.tsx                      # Main app with navigation
+├── types.ts                     # 15+ TypeScript interfaces
+├── authTypes.ts                 # Authentication models
+├── App.tsx                      # Main app with routing
 └── vite.config.ts              # Build configuration
 ```
 
@@ -246,15 +297,102 @@ Follow [Google Cloud Run deployment guide](https://cloud.google.com/run/docs/qui
 
 ## 🤝 Contributing
 
-This is a hackathon MVP. Future enhancements could include:
-- Multi-language support
-- Parent/guardian dashboard
-- Integration with school management systems
-- Peer mentoring features
-- Gamification and rewards
-- Mobile app version
-- AI-powered study plans
-- Video/voice chat capabilities
+This is a hackathon MVP. See "Upcoming Features" section below for planned enhancements.
+
+## 🔮 Upcoming Features
+
+### Phase 1 - Enhanced Communication
+- [ ] **Group Study Rooms**: Create virtual study sessions with multiple students
+- [ ] **Video/Voice Chat**: Real-time video calls with teachers and peers
+- [ ] **Screen Sharing**: Share screens for collaborative problem-solving
+- [ ] **File Attachments**: Send and receive study materials, notes, PDFs
+
+### Phase 2 - Advanced Analytics
+- [ ] **Predictive Performance**: AI predicts exam performance based on preparation
+- [ ] **Learning Style Optimization**: Personalized study recommendations
+- [ ] **Time Management AI**: Smart scheduling based on workload and deadlines
+- [ ] **Comparison Analytics**: Anonymous peer performance benchmarking
+
+### Phase 3 - Gamification & Rewards
+- [ ] **Achievement Badges**: Earn badges for study streaks, goals, improvements
+- [ ] **Leaderboards**: Friendly competition with classmates
+- [ ] **XP System**: Gain experience points for completing tasks
+- [ ] **Virtual Rewards**: Unlock themes, avatars, study tools
+
+### Phase 4 - Parent/Guardian Features
+- [ ] **Parent Dashboard**: View child's progress and well-being
+- [ ] **Weekly Reports**: Automated summary emails
+- [ ] **Concern Alerts**: Notifications for academic/mental health issues
+- [ ] **Parent-Teacher Communication**: Direct messaging channel
+
+### Phase 5 - School Integration
+- [ ] **LMS Integration**: Connect with Canvas, Google Classroom, Moodle
+- [ ] **Grade Sync**: Automatic grade import from school systems
+- [ ] **Calendar Integration**: Sync with school calendars
+- [ ] **Attendance Tracking**: Monitor and report attendance patterns
+
+### Phase 6 - AI Enhancements
+- [ ] **Study Plan Generator**: AI creates personalized study schedules
+- [ ] **Doubt Solver**: AI explains concepts with step-by-step solutions
+- [ ] **Practice Problem Generator**: Auto-generate practice questions
+- [ ] **Essay Reviewer**: AI feedback on writing assignments
+- [ ] **Voice AI Mentor**: Voice-based interactions for accessibility
+
+### Phase 7 - Wellness Features
+- [ ] **Meditation & Mindfulness**: Guided sessions for stress relief
+- [ ] **Break Reminders**: Smart notifications to take study breaks
+- [ ] **Sleep Tracker**: Monitor and optimize sleep patterns
+- [ ] **Nutrition Tips**: Healthy eating advice for students
+- [ ] **Exercise Challenges**: Physical fitness goals and tracking
+
+### Phase 8 - Career Development
+- [ ] **Career Aptitude Tests**: AI-powered career assessments
+- [ ] **Industry Mentorship**: Connect with professionals in dream fields
+- [ ] **College Planning**: Application guidance and deadlines
+- [ ] **Skill Development Paths**: Curated learning tracks for career goals
+- [ ] **Internship Finder**: Opportunities matching student interests
+
+### Phase 9 - Content Library
+- [ ] **Video Tutorials**: Recorded lessons for all subjects
+- [ ] **Practice Tests**: Mock exams with detailed explanations
+- [ ] **Study Notes**: Community-contributed study materials
+- [ ] **Formula Sheets**: Quick reference guides
+- [ ] **Past Papers**: Previous exam papers with solutions
+
+### Phase 10 - Advanced Features
+- [ ] **Multi-language Support**: Interface in student's native language
+- [ ] **Offline Mode**: Access key features without internet
+- [ ] **Mobile Apps**: Native iOS and Android applications
+- [ ] **Smart Watch Integration**: Quick check-ins and reminders
+- [ ] **AR Study Tools**: Augmented reality for interactive learning
+- [ ] **Blockchain Certificates**: Verified achievement credentials
+- [ ] **AI Tutor Network**: Connect with specialized AI tutors
+
+### Phase 11 - Teacher Tools
+- [ ] **Class Management**: Bulk homework and test assignments
+- [ ] **Automated Grading**: AI-assisted assignment evaluation
+- [ ] **Attendance Dashboard**: Visual attendance tracking
+- [ ] **Performance Predictions**: Early warning system for at-risk students
+- [ ] **Lesson Planning AI**: Curriculum suggestions and resources
+
+### Phase 12 - Community Features
+- [ ] **Study Groups**: Form groups based on subjects/interests
+- [ ] **Peer Tutoring Marketplace**: Students help each other
+- [ ] **Discussion Forums**: Subject-wise Q&A communities
+- [ ] **Resource Sharing**: Exchange notes, summaries, tips
+- [ ] **Event Calendar**: School events, deadlines, competitions
+
+## 💭 Feature Suggestions
+
+Have ideas for new features? We'd love to hear them! The system is designed to be extensible and can accommodate:
+
+- **Custom Integrations**: Connect with your school's specific tools
+- **Specialized Subjects**: Advanced courses, languages, vocational training
+- **Regional Adaptations**: Country-specific curricula and exam boards
+- **Accessibility Features**: Screen readers, dyslexia-friendly modes, etc.
+- **Cultural Customization**: Respect local education systems and values
+
+---
 
 ## 📝 License
 

@@ -49,11 +49,13 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
             <div className="bg-white/20 px-3 py-1 rounded-full">
               Grade: {profile.grade}
             </div>
+            {profile.currentGoals && profile.currentGoals.length > 0 && (
+              <div className="bg-white/20 px-3 py-1 rounded-full">
+                🎯 {profile.currentGoals.length} Active Goals
+              </div>
+            )}
             <div className="bg-white/20 px-3 py-1 rounded-full">
-              Dream: {profile.dreamJob}
-            </div>
-            <div className="bg-white/20 px-3 py-1 rounded-full">
-              {checkIns.length} check-ins completed
+              {profile.subjects.length} Subjects
             </div>
           </div>
         </div>

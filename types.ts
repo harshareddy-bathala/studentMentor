@@ -11,14 +11,19 @@ export interface StudentProfile {
   academicGoals: string;
   learningStyle?: 'visual' | 'auditory' | 'kinesthetic' | 'reading-writing';
   
-  // Career & Aspirations
+  // Career & Aspirations (Editable - not shown in dashboard)
   careerAspirations: string;
   dreamJob: string;
   roleModels?: string;
   
-  // Interests & Hobbies
+  // Interests & Hobbies (Editable by student)
   interests: string[];
   hobbies: string[];
+  
+  // Goals (Dynamic - student can update anytime)
+  currentGoals?: string[];
+  shortTermGoals?: string[];
+  longTermGoals?: string[];
   
   // Sports & Physical Activities
   sportsActivities: string[];
@@ -164,4 +169,102 @@ export interface SessionContext {
   currentMood?: string;
   currentGoals?: string[];
   recentChallenges?: string[];
+}
+
+// Homework/ToDo assigned by teacher
+export interface Homework {
+  id: string;
+  studentId: string;
+  teacherId: string;
+  teacherName: string;
+  subject: string;
+  title: string;
+  description: string;
+  assignedDate: string;
+  dueDate: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  estimatedTime?: number; // in minutes
+  status: 'pending' | 'in-progress' | 'completed' | 'submitted' | 'overdue';
+  completedAt?: string;
+  notes?: string;
+  attachments?: string[];
+}
+
+// Upcoming Tests
+export interface Test {
+  id: string;
+  studentId: string;
+  teacherId: string;
+  teacherName: string;
+  subject: string;
+  title: string;
+  description?: string;
+  testDate: string;
+  duration?: number; // in minutes
+  syllabus: string[];
+  importance: 'quiz' | 'unit-test' | 'midterm' | 'final' | 'board-exam';
+  preparationStatus: 'not-started' | 'in-progress' | 'well-prepared';
+  studyMaterials?: string[];
+  notes?: string;
+  createdAt: string;
+}
+
+// Chat Contacts (Classmates & Teachers)
+export interface ChatContact {
+  id: string;
+  name: string;
+  role: 'student' | 'teacher';
+  subject?: string; // for teachers
+  class?: string;
+  avatarUrl?: string;
+  isOnline: boolean;
+  lastSeen?: string;
+}
+
+// Chat Messages between students/teachers
+export interface PeerMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  type: 'text' | 'image' | 'file';
+  attachmentUrl?: string;
+}
+
+// Conversation Thread
+export interface Conversation {
+  id: string;
+  participants: string[]; // user IDs
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  type: 'peer' | 'teacher' | 'group';
+}
+
+// Teacher Alert (AI-triggered)
+export interface TeacherAlert {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId?: string; // can be null for general alert
+  alertType: 'academic-struggle' | 'mental-health' | 'behavior' | 'attendance' | 'general';
+  severity: 'low' | 'medium' | 'high' | 'urgent';
+  title: string;
+  description: string;
+  aiInsight: string;
+  suggestedActions: string[];
+  relatedData: {
+    recentCheckIns?: DailyCheckIn[];
+    recentActivities?: ActivityLog[];
+    academicMetrics?: any;
+  };
+  status: 'new' | 'acknowledged' | 'in-progress' | 'resolved';
+  createdAt: string;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  teacherNotes?: string;
 }
