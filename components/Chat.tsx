@@ -16,22 +16,45 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [], tests = [], onAddActivity, onTriggerAlert }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [mentorChat, setMentorChat] = useState<GenAIChat | null>(null);
+  // mentorChat can be a real GenAI chat instance or a lightweight mock when API key is missing
+  const [mentorChat, setMentorChat] = useState<any | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Initialize AI mentor with simple prompt
   useEffect(() => {
     const initializeMentorChat = async () => {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      
+
+      // If API key is not present, fall back to a local demo/mocked chat to keep the UI functional.
       if (!apiKey) {
-        console.error("Gemini API key not found. Please set VITE_GEMINI_API_KEY in your .env file");
-        const errorMessage: ChatMessage = {
-          id: `error-${Date.now()}`,
+        console.warn("Gemini API key not found. Running AI Mentor in demo mode (mock responses).");
+        setIsDemoMode(true);
+
+        // Create a tiny mock chat with an async iterable response stream
+        const mockSendMessageStream = async function* (opts: { message: string } | any) {
+          const userMsg = typeof opts === 'string' ? opts : opts.message || '';
+          const firstName = (profile.name && profile.name.split(' ')[0]) || profile.name;
+          const reply = `Hi ${firstName}, I'm running in demo mode because the API key isn't configured. I can provide simple tips and canned answers. You asked: "${userMsg}"\n\nTry: "Help me with ${profile.subjects[0] || 'a topic'}"`;
+          const chunks = reply.match(/.{1,60}/g) || [reply];
+          for (const c of chunks) {
+            // small delay to simulate streaming
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((r) => setTimeout(r, 120));
+            yield { text: c };
+          }
+        };
+
+        const mockChat = { sendMessageStream: mockSendMessageStream };
+        setMentorChat(mockChat);
+
+        const firstName = (profile.name && profile.name.split(' ')[0]) || profile.name;
+        const welcomeMessage: ChatMessage = {
+          id: `model-welcome-${Date.now()}`,
           role: 'model',
-          content: "⚠️ API key not configured. Please add your Gemini API key to the .env file as VITE_GEMINI_API_KEY. Get your free key from: https://aistudio.google.com/app/apikey",
+          content: `Hello ${firstName}! 👋\n\nYou're in demo mode: the AI mentor will return simulated answers so you can try the chat without an API key.`,
           timestamp: new Date().toISOString(),
         };
-        setMessages([errorMessage]);
+        setMessages([welcomeMessage]);
         return;
       }
 
@@ -341,11 +364,12 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
           </div>
         ) : (
           <ChatInterface
-            messages={messages}
-            isLoading={isLoading}
-            onSendMessage={handleSendMessage}
-            suggestedPrompts={messages.length === 1 ? suggestedPrompts : undefined}
-          />
+              messages={messages}
+              isLoading={isLoading}
+              onSendMessage={handleSendMessage}
+              suggestedPrompts={messages.length === 1 ? suggestedPrompts : undefined}
+              showHeader={false} // Header is rendered by the page wrapper to avoid duplication
+            />
         )}
       </div>
 
