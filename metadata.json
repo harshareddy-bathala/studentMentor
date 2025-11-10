@@ -1,5 +1,0 @@
-{
-  "name": "Student Mentor AI",
-  "description": "A two-stage web app for students. Stage 1 is an onboarding page that asks a student for their name, age, and biggest challenge. Stage 2 is a mentor chat page where an AI provides personalized, empathetic answers to their school questions based on their profile.",
-  "requestFramePermissions": []
-}
