@@ -488,7 +488,13 @@ const App: React.FC = () => {
           )}
 
           {currentView === 'dashboard' && (
-            <Dashboard profile={profile} checkIns={checkIns} activities={activities} />
+            <Dashboard 
+              profile={profile} 
+              checkIns={checkIns} 
+              activities={activities} 
+              homework={homework}
+              tests={tests}
+            />
           )}
           {currentView === 'homework' && (
             <HomeworkList studentId={profile.id} homework={homework} onUpdate={setHomework} />
@@ -510,7 +516,9 @@ const App: React.FC = () => {
             <Chat 
               profile={profile} 
               checkIns={checkIns} 
-              activities={activities} 
+              activities={activities}
+              homework={homework}
+              tests={tests}
               onAddActivity={addActivity} 
               onTriggerAlert={handleTriggerAlert}
             />

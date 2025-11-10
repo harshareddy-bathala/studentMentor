@@ -1,42 +1,71 @@
 import React, { useMemo } from 'react';
-import { StudentProfile, DailyCheckIn, ActivityLog } from '../types';
+import { StudentProfile, DailyCheckIn, ActivityLog, Homework, Test } from '../types';
 import { analyzeMoodPatterns, calculateAcademicMetrics } from '../utils/aiHelpers';
 
 interface DashboardProps {
   profile: StudentProfile;
   checkIns: DailyCheckIn[];
   activities: ActivityLog[];
+  homework?: Homework[];
+  tests?: Test[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) => {
-  const moodAnalysis = useMemo(() => analyzeMoodPatterns(checkIns), [checkIns]);
+const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities, homework = [], tests = [] }) => {
   const academicMetrics = useMemo(() => calculateAcademicMetrics(checkIns), [checkIns]);
 
-  const recentCheckIns = checkIns.slice(0, 7);
   const recentActivities = activities.slice(0, 5);
 
-  const getMoodEmoji = (mood: string) => {
-    const emojis: Record<string, string> = {
-      'excellent': '😄',
-      'good': '😊',
-      'okay': '😐',
-      'stressed': '😰',
-      'struggling': '😔'
-    };
-    return emojis[mood] || '😐';
+  // Get upcoming deadlines (homework + tests)
+  const upcomingDeadlines = useMemo(() => {
+    const now = new Date();
+    const deadlines: Array<{type: 'homework' | 'test', title: string, date: string, subject: string, priority?: string, importance?: string}> = [];
+    
+    homework.forEach(hw => {
+      if (hw.status !== 'completed' && hw.status !== 'submitted') {
+        deadlines.push({
+          type: 'homework',
+          title: hw.title,
+          date: hw.dueDate,
+          subject: hw.subject,
+          priority: hw.priority
+        });
+      }
+    });
+
+    tests.forEach(test => {
+      deadlines.push({
+        type: 'test',
+        title: test.title,
+        date: test.testDate,
+        subject: test.subject,
+        importance: test.importance
+      });
+    });
+
+    return deadlines
+      .filter(d => new Date(d.date) >= now)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5);
+  }, [homework, tests]);
+
+  const getDaysUntil = (date: string) => {
+    const days = Math.ceil((new Date(date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    return `${days} days`;
   };
 
-  const getTrendColor = (trend: string) => {
-    if (trend === 'improving') return 'text-green-400';
-    if (trend === 'declining') return 'text-red-400';
-    return 'text-yellow-400';
+  const getWellbeingStatus = () => {
+    if (checkIns.length === 0) return { status: 'No data', color: 'text-gray-400' };
+    const recent = checkIns.slice(0, 3);
+    const avgEnergy = recent.reduce((sum, c) => sum + c.energyLevel, 0) / recent.length;
+    
+    if (avgEnergy >= 7) return { status: 'Energetic', emoji: '⚡', color: 'text-green-400' };
+    if (avgEnergy >= 5) return { status: 'Balanced', emoji: '😊', color: 'text-blue-400' };
+    return { status: 'Low energy', emoji: '😴', color: 'text-orange-400' };
   };
 
-  const getTrendIcon = (trend: string) => {
-    if (trend === 'improving') return '↗';
-    if (trend === 'declining') return '↘';
-    return '→';
-  };
+  const wellbeing = getWellbeingStatus();
 
   return (
     <div className="min-h-screen bg-slate-900 p-4 sm:p-6">
@@ -60,26 +89,19 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
+        {/* Quick Stats Grid - Professional & Minimalistic */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Mood Status */}
+          {/* Wellbeing Status - Positive Energy Focus */}
           <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Current Mood</p>
-                <p className="text-2xl font-bold text-white mt-1">
-                  {moodAnalysis.averageMood} {getMoodEmoji(moodAnalysis.averageMood)}
+                <p className="text-slate-400 text-sm">Energy Level</p>
+                <p className={`text-2xl font-bold mt-1 ${wellbeing.color}`}>
+                  {wellbeing.emoji} {wellbeing.status}
                 </p>
               </div>
-              <span className={`text-3xl ${getTrendColor(moodAnalysis.trend)}`}>
-                {getTrendIcon(moodAnalysis.trend)}
-              </span>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
-              {moodAnalysis.trend === 'improving' && 'Great progress!'}
-              {moodAnalysis.trend === 'declining' && 'Let\'s work on this'}
-              {moodAnalysis.trend === 'stable' && 'Maintaining steady'}
-            </p>
+            <p className="text-xs text-slate-500 mt-2">Based on recent activity</p>
           </div>
 
           {/* Study Hours */}
@@ -87,7 +109,7 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
             <div>
               <p className="text-slate-400 text-sm">Avg Study Hours</p>
               <p className="text-2xl font-bold text-sky-400 mt-1">
-                {academicMetrics.averageStudyHours}h
+                {academicMetrics.averageStudyHours}h/day
               </p>
             </div>
             <p className="text-xs text-slate-500 mt-2">
@@ -118,26 +140,19 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
             </div>
           </div>
 
-          {/* Stress Level */}
+          {/* Attendance */}
           <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
             <div>
-              <p className="text-slate-400 text-sm">Stress Level</p>
-              <p className="text-2xl font-bold text-orange-400 mt-1">
-                {moodAnalysis.averageStress}/10
+              <p className="text-slate-400 text-sm">Attendance</p>
+              <p className="text-2xl font-bold text-purple-400 mt-1">
+                {academicMetrics.attendanceRate}%
               </p>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
-              {moodAnalysis.averageStress < 4 && 'Low stress 😌'}
-              {moodAnalysis.averageStress >= 4 && moodAnalysis.averageStress < 7 && 'Moderate 🤔'}
-              {moodAnalysis.averageStress >= 7 && 'High - need support 😰'}
-            </p>
+            <p className="text-xs text-slate-500 mt-2">Classes attended</p>
             <div className="mt-2 bg-slate-700 rounded-full h-2">
               <div
-                className={`rounded-full h-2 ${
-                  moodAnalysis.averageStress < 4 ? 'bg-green-500' :
-                  moodAnalysis.averageStress < 7 ? 'bg-yellow-500' : 'bg-red-500'
-                }`}
-                style={{ width: `${moodAnalysis.averageStress * 10}%` }}
+                className="bg-purple-500 rounded-full h-2"
+                style={{ width: `${academicMetrics.attendanceRate}%` }}
               />
             </div>
           </div>
@@ -145,38 +160,50 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Check-ins */}
+          {/* Upcoming Deadlines - NEW FEATURE */}
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-4">Recent Check-ins 📅</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">📅 Upcoming Deadlines</h2>
             <div className="space-y-3">
-              {recentCheckIns.length > 0 ? (
-                recentCheckIns.map((checkIn) => (
-                  <div key={checkIn.id} className="bg-slate-700/50 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-white font-medium">
-                          {new Date(checkIn.date).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </p>
-                        <p className="text-sm text-slate-400 mt-1">
-                          {getMoodEmoji(checkIn.mood)} {checkIn.mood} • {checkIn.studyHours}h study
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-slate-500">Stress</p>
-                        <p className="text-sm font-semibold text-orange-400">{checkIn.stressLevel}/10</p>
+              {upcomingDeadlines.length > 0 ? (
+                upcomingDeadlines.map((deadline, idx) => {
+                  const daysUntil = getDaysUntil(deadline.date);
+                  const isUrgent = daysUntil === 'Today' || daysUntil === 'Tomorrow';
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`rounded-lg p-4 ${
+                        isUrgent ? 'bg-red-900/20 border border-red-500/30' : 'bg-slate-700/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${
+                          deadline.type === 'homework' ? 'bg-blue-500/20' : 'bg-purple-500/20'
+                        }`}>
+                          {deadline.type === 'homework' ? '📚' : '📝'}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-medium">{deadline.title}</p>
+                          <p className="text-sm text-slate-400">{deadline.subject}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold text-sm ${isUrgent ? 'text-red-400' : 'text-sky-400'}`}>
+                            {daysUntil}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(deadline.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    {checkIn.moodNotes && (
-                      <p className="text-xs text-slate-400 mt-2 italic">"{checkIn.moodNotes}"</p>
-                    )}
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <p className="text-slate-400 text-center py-8">No check-ins yet. Start tracking your progress!</p>
+                <div className="text-center py-8 text-slate-400">
+                  <div className="text-4xl mb-2">🎉</div>
+                  <p>No upcoming deadlines!</p>
+                  <p className="text-sm mt-1">You're all caught up</p>
+                </div>
               )}
             </div>
           </div>
@@ -248,51 +275,6 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities }) 
               );
             })}
           </div>
-        </div>
-
-        {/* Concerns & Recommendations */}
-        {moodAnalysis.concerns.length > 0 && (
-          <div className="bg-orange-900/30 border border-orange-700 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-orange-300 mb-4">⚠️ Areas Needing Attention</h2>
-            <ul className="space-y-2">
-              {moodAnalysis.concerns.map((concern, idx) => (
-                <li key={idx} className="text-orange-200 flex items-start gap-2">
-                  <span className="text-orange-400 mt-1">•</span>
-                  <span>{concern}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-sm text-orange-300 mt-4">
-              💡 Consider discussing these with your mentor or a trusted adult.
-            </p>
-          </div>
-        )}
-
-        {/* Goals & Aspirations */}
-        <div className="bg-gradient-to-r from-purple-900/50 to-sky-900/50 border border-purple-700 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-purple-300 mb-4">🎯 Your Journey</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-purple-200 font-medium">Dream Career</p>
-              <p className="text-white text-lg mt-1">{profile.dreamJob}</p>
-            </div>
-            <div>
-              <p className="text-sm text-purple-200 font-medium">Current Goals</p>
-              <p className="text-white text-sm mt-1">{profile.academicGoals}</p>
-            </div>
-          </div>
-          {profile.interests.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm text-purple-200 font-medium mb-2">Your Interests</p>
-              <div className="flex flex-wrap gap-2">
-                {profile.interests.map((interest, idx) => (
-                  <span key={idx} className="px-3 py-1 bg-purple-600/30 text-purple-200 rounded-full text-sm">
-                    {interest}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

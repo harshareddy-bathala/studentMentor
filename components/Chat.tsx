@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat as GenAIChat } from '@google/genai';
-import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type SessionContext, type TeacherAlert } from '../types';
+import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type SessionContext, type TeacherAlert, type Homework, type Test } from '../types';
 import { generateMentorSystemInstruction } from '../utils/aiHelpers';
 
 interface ChatProps {
   profile: StudentProfile;
   checkIns: DailyCheckIn[];
   activities: ActivityLog[];
+  homework?: Homework[];
+  tests?: Test[];
   onAddActivity: (activity: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
   onTriggerAlert?: (alert: Omit<TeacherAlert, 'id' | 'createdAt'>) => void;
 }
@@ -19,7 +21,7 @@ const TypingIndicator: React.FC = () => (
   </div>
 );
 
-const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivity, onTriggerAlert }) => {
+const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [], tests = [], onAddActivity, onTriggerAlert }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,50 +41,82 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, onAddActivit
   // Initialize AI mentor with comprehensive context
   useEffect(() => {
     const initializeMentorChat = async () => {
-      if (process.env.API_KEY) {
-        try {
-          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-          
-          // Build session context
-          const sessionContext: SessionContext = {
-            recentActivities: activities.slice(0, 10),
-            recentCheckIns: checkIns.slice(0, 7),
-            currentMood: checkIns.length > 0 ? checkIns[0].mood : undefined,
-            currentGoals: [profile.academicGoals, profile.fitnessGoals].filter(Boolean),
-            recentChallenges: checkIns.slice(0, 3).map(c => c.academicChallengesFaced).filter(Boolean),
-          };
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        console.error("Gemini API key not found. Please set VITE_GEMINI_API_KEY in your .env file");
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          role: 'model',
+          content: "⚠️ API key not configured. Please add your Gemini API key to the .env file as VITE_GEMINI_API_KEY. Get your free key from: https://aistudio.google.com/app/apikey",
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([errorMessage]);
+        return;
+      }
 
-          const systemInstruction = generateMentorSystemInstruction(profile, sessionContext);
-          
-          const newChat = ai.chats.create({
-            model: 'gemini-2.0-flash-exp',
-            config: { 
-              systemInstruction,
-              temperature: 0.8,
-              topP: 0.95,
-            },
-          });
-          
-          setMentorChat(newChat);
+      try {
+        const ai = new GoogleGenAI({ apiKey });
+        
+        // Build enhanced session context with homework, tests, and goals
+        const pendingHomework = homework.filter(h => h.status !== 'completed' && h.status !== 'submitted');
+        const upcomingTests = tests.filter(t => new Date(t.testDate) > new Date());
+        const currentGoals = [
+          ...(profile.currentGoals || []),
+          profile.academicGoals,
+          profile.fitnessGoals
+        ].filter(Boolean);
 
-          // Send welcome message
-          const welcomeMessage: ChatMessage = {
-            id: `model-welcome-${Date.now()}`,
-            role: 'model',
-            content: getWelcomeMessage(profile, checkIns),
-            timestamp: new Date().toISOString(),
-          };
-          setMessages([welcomeMessage]);
-        } catch (error) {
-          console.error("Failed to initialize mentor chat:", error);
-          const errorMessage: ChatMessage = {
-            id: `error-${Date.now()}`,
-            role: 'model',
-            content: "Hi! I'm having a bit of trouble starting up. Please refresh the page and try again.",
-            timestamp: new Date().toISOString(),
-          };
-          setMessages([errorMessage]);
-        }
+        const sessionContext: SessionContext = {
+          recentActivities: activities.slice(0, 10),
+          recentCheckIns: checkIns.slice(0, 7),
+          currentMood: checkIns.length > 0 ? checkIns[0].mood : undefined,
+          currentGoals,
+          recentChallenges: checkIns.slice(0, 3).map(c => c.academicChallengesFaced).filter(Boolean),
+          pendingHomework: pendingHomework.slice(0, 5).map(h => ({
+            subject: h.subject,
+            title: h.title,
+            dueDate: h.dueDate,
+            priority: h.priority
+          })),
+          upcomingTests: upcomingTests.slice(0, 5).map(t => ({
+            subject: t.subject,
+            title: t.title,
+            testDate: t.testDate,
+            importance: t.importance
+          })),
+        };
+
+        const systemInstruction = generateMentorSystemInstruction(profile, sessionContext);
+        
+        const newChat = ai.chats.create({
+          model: 'gemini-2.0-flash-exp',
+          config: { 
+            systemInstruction,
+            temperature: 0.8,
+            topP: 0.95,
+          },
+        });
+        
+        setMentorChat(newChat);
+
+        // Send welcome message
+        const welcomeMessage: ChatMessage = {
+          id: `model-welcome-${Date.now()}`,
+          role: 'model',
+          content: getWelcomeMessage(profile, checkIns),
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([welcomeMessage]);
+      } catch (error) {
+        console.error("Failed to initialize mentor chat:", error);
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          role: 'model',
+          content: "Hi! I'm having a bit of trouble connecting to the AI service. Please check your API key and try refreshing the page.",
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([errorMessage]);
       }
     };
 

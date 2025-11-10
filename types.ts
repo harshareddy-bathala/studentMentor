@@ -169,6 +169,18 @@ export interface SessionContext {
   currentMood?: string;
   currentGoals?: string[];
   recentChallenges?: string[];
+  pendingHomework?: Array<{
+    subject: string;
+    title: string;
+    dueDate: string;
+    priority: string;
+  }>;
+  upcomingTests?: Array<{
+    subject: string;
+    title: string;
+    testDate: string;
+    importance: string;
+  }>;
 }
 
 // Homework/ToDo assigned by teacher

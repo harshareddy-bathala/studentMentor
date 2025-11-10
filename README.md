@@ -177,8 +177,9 @@ student-mentor-ai/
 3. **Configure API Key**:
    Create a `.env.local` file in the root directory:
    ```env
-   GEMINI_API_KEY=your_api_key_here
+   VITE_GEMINI_API_KEY=your_api_key_here
    ```
+   Get your free Gemini API key from: https://aistudio.google.com/app/apikey
 
 4. **Start development server**:
    ```bash

@@ -108,12 +108,40 @@ function generateContextSummary(context: SessionContext): string {
   }
 
   if (context.currentGoals && context.currentGoals.length > 0) {
-    summary += `- Current Goals: ${context.currentGoals.join(', ')}\n`;
+    summary += `- Active Goals: ${context.currentGoals.join(', ')}\n`;
+  }
+
+  // Add pending homework context
+  if (context.pendingHomework && context.pendingHomework.length > 0) {
+    summary += `\n**PENDING HOMEWORK (${context.pendingHomework.length} tasks):**\n`;
+    context.pendingHomework.forEach(hw => {
+      const dueDate = new Date(hw.dueDate);
+      const daysUntil = Math.ceil((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      const urgency = daysUntil <= 1 ? '🔴 URGENT' : daysUntil <= 3 ? '🟡' : '🟢';
+      summary += `  ${urgency} ${hw.subject}: ${hw.title} (Due in ${daysUntil} days, Priority: ${hw.priority})\n`;
+    });
+  }
+
+  // Add upcoming tests context
+  if (context.upcomingTests && context.upcomingTests.length > 0) {
+    summary += `\n**UPCOMING TESTS (${context.upcomingTests.length} exams):**\n`;
+    context.upcomingTests.forEach(test => {
+      const testDate = new Date(test.testDate);
+      const daysUntil = Math.ceil((testDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      const urgency = daysUntil <= 3 ? '🔴 SOON' : daysUntil <= 7 ? '🟡' : '🟢';
+      summary += `  ${urgency} ${test.subject}: ${test.title} (In ${daysUntil} days, Type: ${test.importance})\n`;
+    });
   }
 
   if (context.recentActivities && context.recentActivities.length > 0) {
     const recentHighlights = context.recentActivities.slice(0, 3).map(a => a.description).join('; ');
-    summary += `- Recent Activity: ${recentHighlights}\n`;
+    summary += `\n**Recent Activity:** ${recentHighlights}\n`;
+  }
+
+  // Add contextual guidance based on workload
+  const totalWorkload = (context.pendingHomework?.length || 0) + (context.upcomingTests?.length || 0);
+  if (totalWorkload > 0) {
+    summary += `\n**MENTORING FOCUS:** Student has ${totalWorkload} upcoming academic responsibilities. Provide specific support for time management, study strategies, and stress management as needed.\n`;
   }
 
   return summary;
