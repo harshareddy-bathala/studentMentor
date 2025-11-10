@@ -139,14 +139,6 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
     setMessages(prev => [...prev, userMessage]);
     setCurrentMessage('');
 
-    // Log user activity
-    onAddActivity({
-      studentId: profile.id,
-      type: 'academic',
-      category: 'chat',
-      description: `Asked mentor about: ${userMessageContent.slice(0, 50)}${userMessageContent.length > 50 ? '...' : ''}`,
-    });
-
     setIsLoading(true);
     try {
       const responseStream = await mentorChat.sendMessageStream({ message: userMessageContent });
@@ -182,10 +174,20 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
       }
     } catch (error) {
       console.error("Failed to send message:", error);
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
+      
       let userFriendlyMessage = "I'm having a little trouble thinking right now. Please try sending your message again in a moment.";
-      if (error instanceof Error && error.message.toLowerCase().includes('api key')) {
-        userFriendlyMessage = "It seems I've lost my connection. Please give me a moment and then try again."
+      if (error instanceof Error) {
+        console.error("Error stack:", error.stack);
+        if (error.message.toLowerCase().includes('api key')) {
+          userFriendlyMessage = "It seems I've lost my connection. Please give me a moment and then try again.";
+        } else if (error.message.toLowerCase().includes('quota') || error.message.toLowerCase().includes('limit')) {
+          userFriendlyMessage = "I'm getting too many requests right now. Please wait a moment and try again.";
+        } else if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+          userFriendlyMessage = "I'm having trouble connecting. Please check your internet and try again.";
+        }
       }
+      
       setMessages(prev => [...prev, { 
         id: `error-${Date.now()}`, 
         role: 'model', 
@@ -382,14 +384,6 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
                       
                       setMessages(prev => [...prev, userMessage]);
                       setCurrentMessage('');
-                      
-                      // Log activity
-                      onAddActivity({
-                        studentId: profile.id,
-                        type: 'academic',
-                        category: 'chat',
-                        description: `Asked mentor about: ${prompt.slice(0, 50)}`,
-                      });
 
                       // Send to AI
                       setIsLoading(true);
@@ -411,10 +405,21 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
                         }
                       } catch (error) {
                         console.error("Failed to send message:", error);
+                        console.error("Error details:", error instanceof Error ? error.message : String(error));
+                        
+                        let userFriendlyMessage = "I'm having trouble responding right now. Please try again in a moment.";
+                        if (error instanceof Error) {
+                          if (error.message.toLowerCase().includes('quota') || error.message.toLowerCase().includes('limit')) {
+                            userFriendlyMessage = "I'm getting too many requests. Please wait a moment and try again.";
+                          } else if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+                            userFriendlyMessage = "Connection problem. Please check your internet and try again.";
+                          }
+                        }
+                        
                         const errorMessage: ChatMessage = {
                           id: `error-${Date.now()}`,
                           role: 'model',
-                          content: "I'm having trouble responding right now. Please try again in a moment.",
+                          content: userFriendlyMessage,
                           timestamp: new Date().toISOString(),
                         };
                         setMessages(prev => [...prev, errorMessage]);
