@@ -34,12 +34,28 @@ import { DeadlinesCard } from './DeadlinesCard';
 import { ActivitiesFeed } from './ActivitiesFeed';
 import { MentorCTA, ChatDrawer } from './MentorCTA';
 
-// Mock data import - replace with API calls
-import { mockStudent, mockTeacherData } from './mockData';
+interface StudentData {
+  id: string;
+  name: string;
+  firstName: string;
+  grade: string;
+  subjects: Array<{ id: string; name: string }>;
+  avgStudyHours: number;
+  weeklyStudy: number[];
+  homeworkCompletionPercent: number;
+  attendancePercent: number;
+  energyLevel: string;
+  overallProgressPercent: number;
+  energyTrend: number[];
+  attendanceTrend: number[];
+  todaysFocus: any[];
+  upcomingDeadlines: any[];
+  recentActivities: any[];
+  goals: any[];
+}
 
 interface PremiumDashboardProps {
-  // Optional: pass student data as prop
-  studentData?: typeof mockStudent;
+  studentData: StudentData;
   // Callbacks for backend integration
   onOpenChat?: () => void;
   onAddGoal?: () => void;
@@ -49,7 +65,7 @@ interface PremiumDashboardProps {
 }
 
 export const PremiumDashboard: React.FC<PremiumDashboardProps> = ({
-  studentData = mockStudent,
+  studentData,
   onOpenChat,
   onAddGoal,
   onViewTasks,
@@ -308,15 +324,15 @@ export const PremiumDashboard: React.FC<PremiumDashboardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-slate-800 p-4 rounded-xl">
                 <p className="text-slate-400 text-sm mb-1">Class Size</p>
-                <p className="text-2xl font-bold text-white">{mockTeacherData.classSize}</p>
+                <p className="text-2xl font-bold text-white">45</p>
               </div>
               <div className="bg-slate-800 p-4 rounded-xl">
                 <p className="text-slate-400 text-sm mb-1">At-Risk Students</p>
-                <p className="text-2xl font-bold text-red-400">{mockTeacherData.atRiskStudents.length}</p>
+                <p className="text-2xl font-bold text-red-400">2</p>
               </div>
               <div className="bg-slate-800 p-4 rounded-xl">
                 <p className="text-slate-400 text-sm mb-1">Class Avg Study Hours</p>
-                <p className="text-2xl font-bold text-blue-400">{mockTeacherData.classAverage.studyHours}h</p>
+                <p className="text-2xl font-bold text-blue-400">2.1h</p>
               </div>
             </div>
           </div>

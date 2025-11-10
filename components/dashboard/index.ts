@@ -15,8 +15,5 @@ export { ActivitiesFeed } from './ActivitiesFeed';
 export { MentorCTA, ChatDrawer } from './MentorCTA';
 export { Sparkline, ProgressRing, MiniBarChart } from './Sparkline';
 
-// Export mock data for testing
-export { mockStudent, mockTeacherData } from './mockData';
-
 // Re-export types if needed
 export type { default as PremiumDashboardType } from './PremiumDashboard';
