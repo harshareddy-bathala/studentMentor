@@ -140,8 +140,30 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
     setCurrentMessage('');
 
     setIsLoading(true);
+    
+    // Helper function to send with retry
+    const sendWithRetry = async (maxRetries = 2) => {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await mentorChat.sendMessageStream({ message: userMessageContent });
+        } catch (error: any) {
+          const isRateLimit = error?.message?.toLowerCase().includes('quota') || 
+                             error?.message?.toLowerCase().includes('limit') ||
+                             error?.message?.toLowerCase().includes('429');
+          
+          if (isRateLimit && attempt < maxRetries) {
+            // Wait before retrying (exponential backoff)
+            const waitTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s...
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            continue;
+          }
+          throw error;
+        }
+      }
+    };
+    
     try {
-      const responseStream = await mentorChat.sendMessageStream({ message: userMessageContent });
+      const responseStream = await sendWithRetry();
       const modelMessageId = `model-${Date.now()}`;
       setMessages(prev => [...prev, { 
         id: modelMessageId, 
@@ -385,10 +407,30 @@ Whether you need help with ${profile.subjects[0] || 'your studies'}, want to tal
                       setMessages(prev => [...prev, userMessage]);
                       setCurrentMessage('');
 
-                      // Send to AI
+                      // Send to AI with retry logic
                       setIsLoading(true);
+                      
+                      const sendWithRetry = async (maxRetries = 2) => {
+                        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                          try {
+                            return await mentorChat.sendMessageStream({ message: prompt });
+                          } catch (error: any) {
+                            const isRateLimit = error?.message?.toLowerCase().includes('quota') || 
+                                               error?.message?.toLowerCase().includes('limit') ||
+                                               error?.message?.toLowerCase().includes('429');
+                            
+                            if (isRateLimit && attempt < maxRetries) {
+                              const waitTime = Math.pow(2, attempt) * 1000;
+                              await new Promise(resolve => setTimeout(resolve, waitTime));
+                              continue;
+                            }
+                            throw error;
+                          }
+                        }
+                      };
+                      
                       try {
-                        const responseStream = await mentorChat.sendMessageStream({ message: prompt });
+                        const responseStream = await sendWithRetry();
                         const modelMessageId = `model-${Date.now()}`;
                         setMessages(prev => [...prev, { 
                           id: modelMessageId, 
