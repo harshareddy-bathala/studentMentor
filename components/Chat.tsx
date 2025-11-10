@@ -388,8 +388,16 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
                 ].map((prompt, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCurrentMessage(prompt)}
-                    className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-xs text-slate-200 transition-colors"
+                    onClick={() => {
+                      setCurrentMessage(prompt);
+                      // Trigger send after setting message
+                      setTimeout(() => {
+                        const form = document.querySelector('form') as HTMLFormElement;
+                        if (form) form.requestSubmit();
+                      }, 50);
+                    }}
+                    disabled={!mentorChat}
+                    className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs text-slate-200 transition-colors"
                   >
                     {prompt}
                   </button>
@@ -402,29 +410,40 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
 
       {/* Input */}
       <footer className="flex-shrink-0 p-4 border-t border-slate-700 bg-slate-900/50">
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
-          <input
-            type="text"
-            value={currentMessage}
-            onChange={(e) => setCurrentMessage(e.target.value)}
-            placeholder="Ask me anything... I'm here to help!"
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-full shadow-sm placeholder-slate-400 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !currentMessage.trim()}
-            className="p-3 rounded-full bg-gradient-to-r from-sky-600 to-purple-600 text-white hover:from-sky-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 shadow-lg"
-            aria-label="Send message"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
-          </button>
-        </form>
-        <p className="text-xs text-slate-500 text-center mt-2">
-          AI mentor powered by Gemini • Conversation is private and supportive
-        </p>
+        {!mentorChat ? (
+          <div className="text-center p-4 bg-orange-900/30 border border-orange-700/50 rounded-lg">
+            <p className="text-orange-300 text-sm font-medium">⚠️ API Key Required</p>
+            <p className="text-orange-200/70 text-xs mt-1">
+              Please configure your Gemini API key in .env.local to use the chat
+            </p>
+          </div>
+        ) : (
+          <>
+            <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
+              <input
+                type="text"
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                placeholder="Ask me anything... I'm here to help!"
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-full shadow-sm placeholder-slate-400 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !currentMessage.trim()}
+                className="p-3 rounded-full bg-gradient-to-r from-sky-600 to-purple-600 text-white hover:from-sky-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 shadow-lg"
+                aria-label="Send message"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
+              </button>
+            </form>
+            <p className="text-xs text-slate-500 text-center mt-2">
+              AI mentor powered by Gemini • Conversation is private and supportive
+            </p>
+          </>
+        )}
       </footer>
     </div>
   );
