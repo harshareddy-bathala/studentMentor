@@ -375,8 +375,8 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
           </div>
         )}
         
-        {messages.length === 1 && (
-          <div className="flex justify-center">
+        {messages.length === 1 && !isLoading && (
+          <div className="flex justify-center mt-6">
             <div className="max-w-md bg-slate-700/50 rounded-xl p-4 border border-slate-600">
               <p className="text-sm text-slate-300 text-center mb-3">💡 Quick prompts to get started:</p>
               <div className="space-y-2">
@@ -388,15 +388,60 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
                 ].map((prompt, idx) => (
                   <button
                     key={idx}
-                    onClick={() => {
-                      setCurrentMessage(prompt);
-                      // Trigger send after setting message
-                      setTimeout(() => {
-                        const form = document.querySelector('form') as HTMLFormElement;
-                        if (form) form.requestSubmit();
-                      }, 50);
+                    onClick={async () => {
+                      if (!mentorChat || isLoading) return;
+                      
+                      // Create user message
+                      const userMessage: ChatMessage = {
+                        id: `user-${Date.now()}`,
+                        role: 'user',
+                        content: prompt,
+                        timestamp: new Date().toISOString(),
+                      };
+                      
+                      setMessages(prev => [...prev, userMessage]);
+                      setCurrentMessage('');
+                      
+                      // Log activity
+                      onAddActivity({
+                        studentId: profile.id,
+                        type: 'academic',
+                        category: 'chat',
+                        description: `Asked mentor about: ${prompt.slice(0, 50)}`,
+                      });
+
+                      // Send to AI
+                      setIsLoading(true);
+                      try {
+                        const responseStream = await mentorChat.sendMessageStream({ message: prompt });
+                        const modelMessageId = `model-${Date.now()}`;
+                        setMessages(prev => [...prev, { 
+                          id: modelMessageId, 
+                          role: 'model', 
+                          content: '',
+                          timestamp: new Date().toISOString(),
+                        }]);
+
+                        for await (const chunk of responseStream) {
+                          const chunkText = chunk.text;
+                          setMessages(prev => prev.map(msg => 
+                            msg.id === modelMessageId ? { ...msg, content: msg.content + chunkText } : msg
+                          ));
+                        }
+                      } catch (error) {
+                        console.error("Failed to send message:", error);
+                        const errorMessage: ChatMessage = {
+                          id: `error-${Date.now()}`,
+                          role: 'model',
+                          content: "I'm having trouble responding right now. Please try again in a moment.",
+                          timestamp: new Date().toISOString(),
+                        };
+                        setMessages(prev => [...prev, errorMessage]);
+                      } finally {
+                        setIsLoading(false);
+                      }
                     }}
-                    disabled={!mentorChat}
+                    disabled={!mentorChat || isLoading}
                     className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs text-slate-200 transition-colors"
                   >
                     {prompt}
