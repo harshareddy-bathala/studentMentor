@@ -1,0 +1,12 @@
+# Deployment ignore patterns
+node_modules
+npm-debug.log
+.env
+.env.local
+.git
+.gitignore
+README.md
+DEMO_SCRIPT.md
+*.md
+.vscode
+.DS_Store
