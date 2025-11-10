@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat as GenAIChat } from '@google/genai';
-import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type SessionContext, type TeacherAlert, type Homework, type Test } from '../types';
-import { generateMentorSystemInstruction } from '../utils/aiHelpers';
+import { type StudentProfile, type ChatMessage, type DailyCheckIn, type ActivityLog, type TeacherAlert, type Homework, type Test } from '../types';
 
 interface ChatProps {
   profile: StudentProfile;
@@ -38,7 +37,7 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
     scrollToBottom();
   }, [messages, isLoading]);
 
-  // Initialize AI mentor with comprehensive context
+  // Initialize AI mentor with simple prompt
   useEffect(() => {
     const initializeMentorChat = async () => {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -58,36 +57,29 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
       try {
         const ai = new GoogleGenAI({ apiKey });
         
-        // Build enhanced session context with homework, tests, and goals
-        const pendingHomework = homework.filter(h => h.status !== 'completed' && h.status !== 'submitted');
-        const upcomingTests = tests.filter(t => new Date(t.testDate) > new Date());
-        const currentGoals = [
-          ...(profile.currentGoals || []),
-          profile.academicGoals,
-          profile.fitnessGoals
-        ].filter(Boolean);
+        // Simple system instruction with just name, subjects, and goals
+        const systemInstruction = `You are an AI personal mentor for ${profile.name}, a student in ${profile.grade}.
 
-        const sessionContext: SessionContext = {
-          recentActivities: activities.slice(0, 10),
-          recentCheckIns: checkIns.slice(0, 7),
-          currentMood: checkIns.length > 0 ? checkIns[0].mood : undefined,
-          currentGoals,
-          recentChallenges: checkIns.slice(0, 3).map(c => c.academicChallengesFaced).filter(Boolean),
-          pendingHomework: pendingHomework.slice(0, 5).map(h => ({
-            subject: h.subject,
-            title: h.title,
-            dueDate: h.dueDate,
-            priority: h.priority
-          })),
-          upcomingTests: upcomingTests.slice(0, 5).map(t => ({
-            subject: t.subject,
-            title: t.title,
-            testDate: t.testDate,
-            importance: t.importance
-          })),
-        };
+**STUDENT INFORMATION:**
+- Name: ${profile.name}
+- Grade: ${profile.grade}
+- Subjects: ${profile.subjects.join(', ')}
+- Dream Job: ${profile.dreamJob}
+- Academic Goals: ${profile.academicGoals}
+- Career Aspirations: ${profile.careerAspirations}
 
-        const systemInstruction = generateMentorSystemInstruction(profile, sessionContext);
+**YOUR ROLE:**
+You are a friendly, supportive mentor who helps ${profile.name} with their studies and personal growth. 
+
+**GUIDELINES:**
+- Always use their name (${profile.name}) occasionally to personalize
+- Help with homework and study strategies for their subjects: ${profile.subjects.join(', ')}
+- Encourage them toward their goal of becoming ${profile.dreamJob}
+- Be warm, encouraging, and age-appropriate for ${profile.grade}
+- Keep responses conversational and helpful
+- Ask follow-up questions to understand their needs
+
+Remember: You're here to support ${profile.name}'s journey to becoming ${profile.dreamJob}!`;
         
         const newChat = ai.chats.create({
           model: 'gemini-2.0-flash-exp',
@@ -104,7 +96,7 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
         const welcomeMessage: ChatMessage = {
           id: `model-welcome-${Date.now()}`,
           role: 'model',
-          content: getWelcomeMessage(profile, checkIns),
+          content: getWelcomeMessage(profile),
           timestamp: new Date().toISOString(),
         };
         setMessages([welcomeMessage]);
@@ -121,27 +113,16 @@ const Chat: React.FC<ChatProps> = ({ profile, checkIns, activities, homework = [
     };
 
     initializeMentorChat();
-  }, [profile, checkIns, activities]);
+  }, [profile]);
 
-  const getWelcomeMessage = (profile: StudentProfile, checkIns: DailyCheckIn[]): string => {
+  const getWelcomeMessage = (profile: StudentProfile): string => {
     const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
-    const latestMood = checkIns.length > 0 ? checkIns[0].mood : null;
     
-    let message = `Good ${timeOfDay}, ${profile.name}! 👋\n\n`;
-    
-    if (latestMood) {
-      if (latestMood === 'excellent' || latestMood === 'good') {
-        message += `I see you're feeling ${latestMood} today - that's wonderful! `;
-      } else if (latestMood === 'stressed' || latestMood === 'struggling') {
-        message += `I noticed you've been feeling ${latestMood}. I'm here to help you through this. `;
-      }
-    }
-    
-    message += `I'm your personal AI mentor, here to support you in achieving your dream of becoming ${profile.dreamJob}. `;
-    message += `\n\nWhether you need help with ${profile.subjects[0] || 'your studies'}, want to talk about your goals, or just need someone to listen, I'm here for you. `;
-    message += `What's on your mind today?`;
-    
-    return message;
+    return `Good ${timeOfDay}, ${profile.name}! 👋
+
+I'm your personal AI mentor, here to support you in achieving your dream of becoming ${profile.dreamJob}. 
+
+Whether you need help with ${profile.subjects[0] || 'your studies'}, want to talk about your goals, or just need someone to listen, I'm here for you. What's on your mind today?`;
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
