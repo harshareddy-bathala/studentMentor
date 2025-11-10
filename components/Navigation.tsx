@@ -57,7 +57,7 @@ const Navigation: React.FC<NavigationProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-from to-primary-to rounded-xl flex items-center justify-center text-white font-bold shadow-card">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-from to-primary-to rounded-xl flex items-center justify-center text-white font-bold shadow-card p-2">
               {authUser.photoURL ? (
                 <img 
                   src={authUser.photoURL} 
@@ -65,7 +65,11 @@ const Navigation: React.FC<NavigationProps> = ({
                   className="w-full h-full rounded-xl object-cover" 
                 />
               ) : (
-                'SM'
+                <img 
+                  src="/favicon_io/favicon-32x32.png" 
+                  alt="Student Mentor AI" 
+                  className="w-full h-full object-contain" 
+                />
               )}
             </div>
             <div className="hidden sm:block">
