@@ -206,6 +206,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
                 trendLabel="Energy level trend over 7 days"
                 statusColor={energyStatus.color}
                 changePercent={5}
+                delay={0}
               />
               
               <StatCard
@@ -217,15 +218,17 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
                 trendLabel="Study hours per day"
                 statusColor="blue"
                 changePercent={12}
+                delay={0.1}
               />
               
-              <CircularStatCard
+              <StatCard
                 icon="✅"
                 title="Homework Completion"
-                percent={studentData.homeworkCompletionPercent}
+                value={`${studentData.homeworkCompletionPercent}%`}
                 subtitle="On track — keep it up!"
                 statusColor="green"
-                onClick={() => console.log('View homework details')}
+                changePercent={0}
+                delay={0.2}
               />
               
               <StatCard
@@ -237,6 +240,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
                 trendLabel="Attendance trend over 7 days"
                 statusColor="green"
                 changePercent={3}
+                delay={0.3}
               />
             </div>
 
