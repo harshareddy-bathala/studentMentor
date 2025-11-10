@@ -53,11 +53,11 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-700 border-red-300';
-      case 'high': return 'bg-orange-100 text-orange-700 border-orange-300';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-      case 'low': return 'bg-green-100 text-green-700 border-green-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      case 'urgent': return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'high': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+      case 'medium': return 'bg-accent-amber/20 text-yellow-300 border-accent-amber/30';
+      case 'low': return 'bg-accent-green/20 text-accent-green border-accent-green/30';
+      default: return 'bg-slate-600/20 text-slate-300 border-slate-600/30';
     }
   };
 
@@ -88,45 +88,51 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">📚 Homework & To-Do</h2>
-          <p className="text-gray-600 mt-1">Track your assignments and tasks</p>
+          <h2 className="text-hero-mobile md:text-section-title font-bold text-white">📚 Homework & To-Do</h2>
+          <p className="text-body-sm text-muted-ink mt-1">Track your assignments and tasks</p>
         </div>
       </div>
 
       {/* Filters & Sort */}
-      <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex flex-wrap gap-3 items-center bg-panel p-4 rounded-2xl shadow-card border border-card-border">
         <div className="flex gap-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
+              filter === 'all' 
+                ? 'bg-gradient-to-r from-primary-from to-primary-to text-white shadow-card' 
+                : 'bg-panel-elevated text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
             All ({homework.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
+              filter === 'pending' 
+                ? 'bg-gradient-to-r from-primary-from to-primary-to text-white shadow-card' 
+                : 'bg-panel-elevated text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
             Pending ({homework.filter(h => h.status !== 'completed' && h.status !== 'submitted').length})
           </button>
           <button
             onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'completed' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
+              filter === 'completed' 
+                ? 'bg-gradient-to-r from-primary-from to-primary-to text-white shadow-card' 
+                : 'bg-panel-elevated text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
             Completed ({homework.filter(h => h.status === 'completed' || h.status === 'submitted').length})
           </button>
         </div>
         <div className="ml-auto flex gap-2 items-center">
-          <span className="text-sm text-gray-600">Sort by:</span>
+          <span className="text-body-sm text-muted-ink">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 bg-panel-elevated border border-card-border text-white rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-discrete-highlight"
           >
             <option value="dueDate">Due Date</option>
             <option value="priority">Priority</option>
@@ -137,10 +143,10 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
       {/* Homework List */}
       <div className="space-y-3">
         {sortedHomework.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center shadow-sm">
+          <div className="bg-panel rounded-2xl p-12 text-center shadow-card border border-card-border">
             <div className="text-6xl mb-4">🎉</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">All caught up!</h3>
-            <p className="text-gray-600">
+            <h3 className="text-section-title font-semibold text-white mb-2">All caught up!</h3>
+            <p className="text-body text-muted-ink">
               {filter === 'all' ? 'No homework assigned yet' : `No ${filter} homework`}
             </p>
           </div>
@@ -148,56 +154,65 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
           sortedHomework.map(hw => (
             <div
               key={hw.id}
-              className={`bg-white rounded-lg p-5 shadow-sm border-l-4 transition-all hover:shadow-md ${
+              className={`bg-panel rounded-2xl p-5 shadow-card border border-card-border border-l-4 transition-all duration-200 hover:shadow-card-hover ${
                 isOverdue(hw.dueDate, hw.status)
-                  ? 'border-red-500'
+                  ? 'border-l-red-500'
                   : hw.status === 'completed' || hw.status === 'submitted'
-                  ? 'border-green-500 opacity-75'
-                  : 'border-indigo-500'
+                  ? 'border-l-accent-green opacity-75'
+                  : 'border-l-primary-to'
               }`}
             >
               <div className="flex items-start gap-4">
                 {/* Checkbox */}
-                <input
-                  type="checkbox"
-                  checked={hw.status === 'completed' || hw.status === 'submitted'}
-                  onChange={() => toggleComplete(hw.id)}
-                  className="mt-1 w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                />
+                <label className="relative flex items-center cursor-pointer group mt-1">
+                  <input
+                    type="checkbox"
+                    checked={hw.status === 'completed' || hw.status === 'submitted'}
+                    onChange={() => toggleComplete(hw.id)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 rounded border-2 border-slate-600 peer-checked:bg-accent-green peer-checked:border-accent-green flex items-center justify-center transition-all group-hover:border-accent-green">
+                    {(hw.status === 'completed' || hw.status === 'submitted') && (
+                      <svg className="w-3 h-3 text-bg-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </label>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1">
-                      <h3 className={`text-lg font-semibold ${
-                        hw.status === 'completed' || hw.status === 'submitted' ? 'line-through text-gray-500' : 'text-gray-900'
+                      <h3 className={`text-body font-semibold ${
+                        hw.status === 'completed' || hw.status === 'submitted' ? 'line-through text-muted-ink' : 'text-white'
                       }`}>
                         {getStatusIcon(hw.status)} {hw.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1">{hw.subject} • {hw.teacherName}</p>
+                      <p className="text-body-sm text-muted-ink mt-1">{hw.subject} • {hw.teacherName}</p>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(hw.priority)}`}>
+                      <span className={`px-3 py-1 rounded-full text-micro font-semibold border ${getPriorityColor(hw.priority)}`}>
                         {hw.priority.toUpperCase()}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-gray-700 mb-3">{hw.description}</p>
+                  <p className="text-body-sm text-slate-300 mb-3">{hw.description}</p>
 
                   {/* Meta Info */}
-                  <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex flex-wrap gap-4 text-body-sm">
                     <span className={`font-medium ${
-                      isOverdue(hw.dueDate, hw.status) ? 'text-red-600' :
-                      new Date(hw.dueDate).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ? 'text-orange-600' :
-                      'text-gray-600'
+                      isOverdue(hw.dueDate, hw.status) ? 'text-red-400' :
+                      new Date(hw.dueDate).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ? 'text-orange-400' :
+                      'text-muted-ink'
                     }`}>
                       📅 {getDaysUntilDue(hw.dueDate)}
                     </span>
                     {hw.estimatedTime && (
-                      <span className="text-gray-600">⏱️ {hw.estimatedTime} min</span>
+                      <span className="text-muted-ink">⏱️ {hw.estimatedTime} min</span>
                     )}
-                    <span className="text-gray-600">
+                    <span className="text-muted-ink">
                       Assigned: {new Date(hw.assignedDate).toLocaleDateString()}
                     </span>
                   </div>
@@ -207,17 +222,17 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => updateStatus(hw.id, 'in-progress')}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        className={`px-3 py-1 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
                           hw.status === 'in-progress'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                            : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'
                         }`}
                       >
                         In Progress
                       </button>
                       <button
                         onClick={() => updateStatus(hw.id, 'submitted')}
-                        className="px-3 py-1 rounded-lg text-sm font-medium bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                        className="px-3 py-1 rounded-xl text-body-sm font-medium bg-accent-green/20 text-accent-green hover:bg-accent-green/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-green"
                       >
                         Mark Submitted
                       </button>
@@ -225,7 +240,7 @@ export default function HomeworkList({ studentId, homework, onUpdate }: Homework
                   )}
 
                   {hw.completedAt && (
-                    <p className="text-sm text-green-600 mt-2">
+                    <p className="text-body-sm text-accent-green mt-2">
                       ✓ Completed on {new Date(hw.completedAt).toLocaleDateString()}
                     </p>
                   )}

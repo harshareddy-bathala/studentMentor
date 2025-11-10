@@ -10,6 +10,7 @@ import HomeworkList from './components/HomeworkList';
 import TestsList from './components/TestsList';
 import PeerChat from './components/PeerChat';
 import TeacherAlerts from './components/TeacherAlerts';
+import Navigation from './components/Navigation';
 import { 
   type StudentProfile, 
   type DailyCheckIn as DailyCheckInType, 
@@ -356,140 +357,20 @@ const App: React.FC = () => {
   const todayCheckIn = checkIns.find(c => c.date === new Date().toISOString().split('T')[0]);
 
   return (
-    <div className="min-h-screen bg-slate-900 font-sans">
+    <div className="min-h-screen bg-bg-dark font-sans">
       {/* Navigation */}
-      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo and Brand */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#6C4AB6] to-[#8B5CF6] rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                {authUser.photoURL ? (
-                  <img src={authUser.photoURL} alt={authUser.name} className="w-full h-full rounded-xl object-cover" />
-                ) : (
-                  'SM'
-                )}
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-white font-semibold">Student Mentor AI</h1>
-                <p className="text-xs text-slate-400">Hey, {profile.name.split(' ')[0]}!</p>
-              </div>
-            </div>
-
-            {/* Navigation Items */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                  currentView === 'dashboard'
-                    ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <span>📊</span>
-                <span className="hidden md:inline">Dashboard</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('homework')}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                  currentView === 'homework'
-                    ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <span>📚</span>
-                <span className="hidden md:inline">Homework</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('tests')}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                  currentView === 'tests'
-                    ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <span>📝</span>
-                <span className="hidden md:inline">Tests</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('peer-chat')}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                  currentView === 'peer-chat'
-                    ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <span>💬</span>
-                <span className="hidden md:inline">Peers</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('chat')}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                  currentView === 'chat'
-                    ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <span>🤖</span>
-                <span className="hidden md:inline">AI Mentor</span>
-              </button>
-              
-              {/* Check In Button */}
-              {!todayCheckIn && (
-                <button
-                  onClick={() => setShowCheckIn(true)}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-green-600/30 flex items-center gap-2"
-                >
-                  <span>✓</span>
-                  <span className="hidden sm:inline">Check In</span>
-                </button>
-              )}
-              
-              {/* Report Button */}
-              <button
-                onClick={() => setShowReport(true)}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-purple-600/30 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span className="hidden sm:inline">Report</span>
-              </button>
-              
-              {/* User Menu */}
-              <div className="relative group">
-                <button className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3DD6B8] to-[#6C4AB6] flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-all">
-                  {profile.name.charAt(0).toUpperCase()}
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                  <div className="p-3 border-b border-slate-600">
-                    <p className="text-sm font-medium text-white">{authUser.name || authUser.email}</p>
-                    <p className="text-xs text-slate-400">{authUser.email}</p>
-                  </div>
-                  <button
-                    onClick={() => setShowGoalsEditor(true)}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-600 transition-colors"
-                  >
-                    🎯 Edit Goals
-                  </button>
-                  <button
-                    onClick={handleResetProfile}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-600 transition-colors"
-                  >
-                    🔄 Reset Profile
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-600 transition-colors rounded-b-lg"
-                  >
-                    🚪 Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation
+        authUser={authUser}
+        profile={profile}
+        currentView={currentView}
+        hasTodayCheckIn={!!todayCheckIn}
+        onViewChange={setCurrentView}
+        onCheckInClick={() => setShowCheckIn(true)}
+        onReportClick={() => setShowReport(true)}
+        onEditGoals={() => setShowGoalsEditor(true)}
+        onResetProfile={handleResetProfile}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
       <main className="h-[calc(100vh-4rem)] overflow-auto">

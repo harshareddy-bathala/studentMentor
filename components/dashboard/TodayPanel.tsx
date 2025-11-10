@@ -7,6 +7,8 @@
  * - Time estimates
  * - Quick action buttons (snooze/reschedule)
  * 
+ * Updated: Uses new premium design system colors
+ * 
  * Accessibility: Checkboxes with labels, keyboard navigation
  */
 
@@ -35,41 +37,41 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
   onRescheduleTask
 }) => {
   const priorityColors = {
-    high: 'border-red-500/50 bg-red-500/10',
-    medium: 'border-yellow-500/50 bg-yellow-500/10',
-    low: 'border-blue-500/50 bg-blue-500/10'
+    high: 'border-red-500/50 bg-red-500/5',
+    medium: 'border-accent-amber/50 bg-accent-amber/5',
+    low: 'border-blue-500/50 bg-blue-500/5'
   };
 
   const priorityDots = {
     high: 'bg-red-500',
-    medium: 'bg-yellow-500',
+    medium: 'bg-accent-amber',
     low: 'bg-blue-500'
   };
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-5 shadow-md">
+    <div className="bg-panel rounded-2xl p-5 shadow-card border border-card-border">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h2 className="text-section-title text-white flex items-center gap-2">
           <span className="text-2xl">📋</span>
           Today's Focus
         </h2>
-        <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded-full">
+        <span className="text-micro text-muted-ink bg-panel-elevated px-2 py-1 rounded-full">
           {tasks.filter(t => !t.completed).length} pending
         </span>
       </div>
 
       <div className="space-y-3">
         {tasks.length === 0 ? (
-          <p className="text-slate-500 text-sm text-center py-8">
+          <p className="text-muted-ink text-body-sm text-center py-8">
             No tasks for today. Great job! 🎉
           </p>
         ) : (
           tasks.map((task) => (
             <div
               key={task.id}
-              className={`relative border rounded-xl p-3 transition-all duration-200 ${
+              className={`relative border rounded-xl p-3 transition-all duration-200 hover:bg-card-hover ${
                 task.completed
-                  ? 'border-slate-700 bg-slate-700/50 opacity-60'
+                  ? 'border-slate-700 bg-slate-700/30 opacity-60'
                   : priorityColors[task.priority]
               }`}
             >
@@ -86,9 +88,9 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
                     className="sr-only peer"
                     aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
                   />
-                  <div className="w-5 h-5 rounded border-2 border-slate-600 peer-checked:bg-[#3DD6B8] peer-checked:border-[#3DD6B8] flex items-center justify-center transition-all group-hover:border-[#3DD6B8]">
+                  <div className="w-5 h-5 rounded border-2 border-slate-600 peer-checked:bg-accent-green peer-checked:border-accent-green flex items-center justify-center transition-all group-hover:border-accent-green">
                     {task.completed && (
-                      <svg className="w-3 h-3 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 text-bg-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -97,15 +99,15 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
 
                 {/* Task content */}
                 <div className="flex-1 min-w-0">
-                  <h3 className={`text-sm font-medium mb-1 ${task.completed ? 'text-slate-500 line-through' : 'text-white'}`}>
+                  <h3 className={`text-body-sm font-medium mb-1 ${task.completed ? 'text-muted-ink line-through' : 'text-white'}`}>
                     {task.title}
                   </h3>
                   
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="px-2 py-0.5 bg-slate-700 text-slate-300 rounded">
+                  <div className="flex flex-wrap items-center gap-2 text-micro">
+                    <span className="px-2 py-0.5 bg-panel-elevated text-slate-300 rounded">
                       {task.subject}
                     </span>
-                    <span className="text-slate-500 flex items-center gap-1">
+                    <span className="text-muted-ink flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -119,7 +121,7 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
                       {onSnoozeTask && (
                         <button
                           onClick={() => onSnoozeTask(task.id)}
-                          className="text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                          className="text-micro text-slate-400 hover:text-slate-300 transition-colors"
                           aria-label={`Snooze task: ${task.title}`}
                         >
                           Snooze
@@ -128,7 +130,7 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
                       {onRescheduleTask && (
                         <button
                           onClick={() => onRescheduleTask(task.id)}
-                          className="text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                          className="text-micro text-slate-400 hover:text-slate-300 transition-colors"
                           aria-label={`Reschedule task: ${task.title}`}
                         >
                           Reschedule
@@ -145,14 +147,14 @@ export const TodayPanel: React.FC<TodayPanelProps> = ({
 
       {/* Progress indicator */}
       {tasks.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <div className="mt-4 pt-4 border-t border-card-border">
+          <div className="flex items-center justify-between text-micro text-muted-ink mb-2">
             <span>Progress</span>
             <span>{Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100)}%</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-panel-elevated rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#3DD6B8] to-[#6C4AB6] rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-accent-green to-primary-to rounded-full transition-all duration-500"
               style={{ width: `${(tasks.filter(t => t.completed).length / tasks.length) * 100}%` }}
             ></div>
           </div>

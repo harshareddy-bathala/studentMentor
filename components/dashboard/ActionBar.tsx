@@ -6,6 +6,8 @@
  * - Add New Goal (secondary)
  * - Today's Tasks (ghost)
  * 
+ * Updated: Uses new premium design system colors
+ * 
  * Responsive: full-width on mobile, inline on desktop
  * Accessibility: Clear focus states, aria-labels
  */
@@ -28,7 +30,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       {/* Primary: Ask Mentor */}
       <button
         onClick={onAskMentor}
-        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6C4AB6] to-[#8B5CF6] text-white font-medium rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-from to-primary-to text-white font-medium rounded-xl shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight focus:ring-offset-2 focus:ring-offset-bg-dark"
         aria-label="Ask your AI Mentor"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,7 +42,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       {/* Secondary: Add Goal */}
       <button
         onClick={onAddGoal}
-        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-slate-200 font-medium rounded-xl border border-slate-700 hover:bg-slate-700 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-panel text-slate-200 font-medium rounded-xl border border-card-border hover:bg-panel-elevated hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight focus:ring-offset-2 focus:ring-offset-bg-dark"
         aria-label="Add a new goal"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +54,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       {/* Ghost: Today's Tasks */}
       <button
         onClick={onViewTasks}
-        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 text-slate-300 font-medium rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 text-muted-ink font-medium rounded-xl hover:bg-panel hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight focus:ring-offset-2 focus:ring-offset-bg-dark"
         aria-label="View today's tasks"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

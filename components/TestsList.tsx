@@ -43,12 +43,12 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
 
   const getImportanceColor = (importance: string) => {
     switch (importance) {
-      case 'board-exam': return 'bg-red-100 text-red-700 border-red-300';
-      case 'final': return 'bg-orange-100 text-orange-700 border-orange-300';
-      case 'midterm': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-      case 'unit-test': return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'quiz': return 'bg-green-100 text-green-700 border-green-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      case 'board-exam': return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'final': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+      case 'midterm': return 'bg-accent-amber/20 text-yellow-300 border-accent-amber/30';
+      case 'unit-test': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'quiz': return 'bg-accent-green/20 text-accent-green border-accent-green/30';
+      default: return 'bg-slate-600/20 text-slate-300 border-slate-600/30';
     }
   };
 
@@ -65,10 +65,10 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
 
   const getPreparationColor = (status: string) => {
     switch (status) {
-      case 'well-prepared': return 'bg-green-500';
-      case 'in-progress': return 'bg-yellow-500';
+      case 'well-prepared': return 'bg-accent-green';
+      case 'in-progress': return 'bg-accent-amber';
       case 'not-started': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      default: return 'bg-slate-600';
     }
   };
 
@@ -85,13 +85,13 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">📝 Upcoming Tests & Exams</h2>
-          <p className="text-gray-600 mt-1">Stay prepared for your assessments</p>
+          <h2 className="text-hero-mobile md:text-section-title font-bold text-white">📝 Upcoming Tests & Exams</h2>
+          <p className="text-body-sm text-muted-ink mt-1">Stay prepared for your assessments</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex flex-wrap gap-3 bg-panel p-4 rounded-2xl shadow-card border border-card-border">
         {[
           { id: 'upcoming', label: 'Upcoming', icon: '🔜' },
           { id: 'today', label: 'Today', icon: '⚡' },
@@ -101,8 +101,10 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id as any)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === tab.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
+              filter === tab.id 
+                ? 'bg-gradient-to-r from-primary-from to-primary-to text-white shadow-card' 
+                : 'bg-panel-elevated text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
             {tab.icon} {tab.label}
@@ -113,10 +115,10 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
       {/* Tests List */}
       <div className="grid gap-4">
         {filteredTests.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center shadow-sm">
+          <div className="bg-panel rounded-2xl p-12 text-center shadow-card border border-card-border">
             <div className="text-6xl mb-4">🎉</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No tests {filter !== 'all' ? filter : 'scheduled'}</h3>
-            <p className="text-gray-600">Enjoy your study time!</p>
+            <h3 className="text-section-title font-semibold text-white mb-2">No tests {filter !== 'all' ? filter : 'scheduled'}</h3>
+            <p className="text-body text-muted-ink">Enjoy your study time!</p>
           </div>
         ) : (
           filteredTests.map(test => {
@@ -126,8 +128,8 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
             return (
               <div
                 key={test.id}
-                className={`bg-white rounded-lg p-6 shadow-sm border-l-4 transition-all hover:shadow-md ${
-                  isUrgent ? 'border-red-500' : 'border-indigo-500'
+                className={`bg-panel rounded-2xl p-6 shadow-card border border-card-border border-l-4 transition-all duration-200 hover:shadow-card-hover ${
+                  isUrgent ? 'border-l-red-500' : 'border-l-primary-to'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -135,20 +137,20 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl">{getImportanceIcon(test.importance)}</span>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">{test.title}</h3>
-                        <p className="text-sm text-gray-600">{test.subject} • {test.teacherName}</p>
+                        <h3 className="text-body font-bold text-white">{test.title}</h3>
+                        <p className="text-body-sm text-muted-ink">{test.subject} • {test.teacherName}</p>
                       </div>
                     </div>
                     {test.description && (
-                      <p className="text-gray-700 mt-2">{test.description}</p>
+                      <p className="text-body-sm text-slate-300 mt-2">{test.description}</p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getImportanceColor(test.importance)}`}>
+                    <span className={`px-3 py-1 rounded-full text-micro font-semibold border ${getImportanceColor(test.importance)}`}>
                       {test.importance.replace('-', ' ').toUpperCase()}
                     </span>
-                    <span className={`px-4 py-2 rounded-lg font-bold ${
-                      isUrgent ? 'bg-red-50 text-red-700' : 'bg-indigo-50 text-indigo-700'
+                    <span className={`px-4 py-2 rounded-xl text-body-sm font-bold ${
+                      isUrgent ? 'bg-red-500/20 text-red-300' : 'bg-primary-to/20 text-primary-to'
                     }`}>
                       {daysUntil}
                     </span>
@@ -158,8 +160,8 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
                 {/* Test Details */}
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">📅 Test Date & Time</p>
-                    <p className="text-gray-900">
+                    <p className="text-body-sm font-medium text-muted-ink mb-2">📅 Test Date & Time</p>
+                    <p className="text-white text-body-sm">
                       {new Date(test.testDate).toLocaleDateString('en-US', {
                         weekday: 'long',
                         year: 'numeric',
@@ -168,14 +170,14 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
                       })}
                     </p>
                     {test.duration && (
-                      <p className="text-sm text-gray-600 mt-1">Duration: {test.duration} minutes</p>
+                      <p className="text-body-sm text-muted-ink mt-1">Duration: {test.duration} minutes</p>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">📚 Syllabus Coverage</p>
+                    <p className="text-body-sm font-medium text-muted-ink mb-2">📚 Syllabus Coverage</p>
                     <div className="flex flex-wrap gap-1">
                       {test.syllabus.map((topic, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs">
+                        <span key={idx} className="px-2 py-1 bg-primary-to/20 text-primary-to rounded text-micro">
                           {topic}
                         </span>
                       ))}
@@ -185,16 +187,16 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
 
                 {/* Preparation Status */}
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Preparation Status</p>
+                  <p className="text-body-sm font-medium text-muted-ink mb-2">Preparation Status</p>
                   <div className="flex gap-2">
                     {(['not-started', 'in-progress', 'well-prepared'] as const).map(status => (
                       <button
                         key={status}
                         onClick={() => updatePreparationStatus(test.id, status)}
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 px-4 py-2 rounded-xl text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-discrete-highlight ${
                           test.preparationStatus === status
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-gradient-to-r from-primary-from to-primary-to text-white shadow-card'
+                            : 'bg-panel-elevated text-slate-300 hover:text-white hover:bg-slate-700'
                         }`}
                       >
                         <div className={`w-2 h-2 rounded-full inline-block mr-2 ${getPreparationColor(status)}`}></div>
@@ -207,8 +209,8 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
                 {/* Study Materials */}
                 {test.studyMaterials && test.studyMaterials.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">📖 Study Materials</p>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                    <p className="text-body-sm font-medium text-muted-ink mb-2">📖 Study Materials</p>
+                    <ul className="list-disc list-inside space-y-1 text-body-sm text-slate-300">
                       {test.studyMaterials.map((material, idx) => (
                         <li key={idx}>{material}</li>
                       ))}
@@ -218,13 +220,13 @@ export default function TestsList({ studentId, tests, onUpdate }: TestsListProps
 
                 {/* Notes */}
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">📝 Your Notes</p>
+                  <p className="text-body-sm font-medium text-muted-ink mb-2">📝 Your Notes</p>
                   <textarea
                     value={test.notes || ''}
                     onChange={(e) => addNote(test.id, e.target.value)}
                     placeholder="Add your preparation notes, questions, or reminders..."
                     rows={2}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                    className="w-full px-3 py-2 bg-panel-elevated border border-card-border text-white placeholder-muted-ink rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-discrete-highlight"
                   />
                 </div>
               </div>

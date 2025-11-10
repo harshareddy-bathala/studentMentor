@@ -8,10 +8,14 @@
  * - Optional sparkline or mini chart
  * - Chevron for expansion
  * 
+ * Updated: Added Framer Motion stagger animations
+ * 
  * Accessibility: Button role for interactive cards, aria-labels
+ * Animation: Fade-in with stagger delay (respects prefers-reduced-motion)
  */
 
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkline, MiniBarChart } from './Sparkline';
 
 interface StatCardProps {
@@ -25,6 +29,7 @@ interface StatCardProps {
   statusColor?: 'green' | 'yellow' | 'red' | 'blue';
   onClick?: () => void;
   changePercent?: number; // e.g., +12 or -5
+  delay?: number; // Animation delay for stagger effect
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -37,8 +42,11 @@ export const StatCard: React.FC<StatCardProps> = ({
   trendLabel,
   statusColor = 'blue',
   onClick,
-  changePercent
+  changePercent,
+  delay = 0
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   const colorClasses = {
     green: 'text-[#3DD6B8]',
     yellow: 'text-yellow-400',
@@ -53,15 +61,19 @@ export const StatCard: React.FC<StatCardProps> = ({
     blue: 'bg-blue-400/10'
   };
 
-  const Component = onClick ? 'button' : 'div';
+  const MotionComponent = motion[onClick ? 'button' : 'div'] as any;
 
   return (
-    <Component
+    <MotionComponent
       onClick={onClick}
       className={`relative bg-slate-800 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-300 ${
         onClick ? 'cursor-pointer hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-purple-400' : ''
       }`}
       {...(onClick && { type: 'button', 'aria-label': `View details for ${title}` })}
+      initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay, ease: "easeOut" }}
+      whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
     >
       {/* Icon badge */}
       <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${bgColorClasses[statusColor]} mb-3`}>
@@ -124,7 +136,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </svg>
         </div>
       )}
-    </Component>
+    </MotionComponent>
   );
 };
 

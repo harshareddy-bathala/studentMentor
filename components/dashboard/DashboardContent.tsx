@@ -32,7 +32,9 @@ import { ActionBar } from './ActionBar';
 import { TodayPanel } from './TodayPanel';
 import { DeadlinesCard } from './DeadlinesCard';
 import { ActivitiesFeed } from './ActivitiesFeed';
-import { MentorCTA, ChatDrawer } from './MentorCTA';
+import { MentorCTA } from './MentorCTA';
+import { ChatDrawer } from '../chat/ChatDrawer';
+import type { ChatMessage } from '../../types';
 
 interface StudentData {
   id: string;
@@ -75,6 +77,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   const [isTeacherMode, setIsTeacherMode] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [tasks, setTasks] = useState(studentData.todaysFocus);
+  
+  // Chat state (will be connected to real AI later)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   // Handlers
   const handleProgressClick = () => {
@@ -106,6 +112,30 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     onToggleTeacherMode?.();
   };
 
+  const handleSendChatMessage = (message: string) => {
+    // Add user message
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+    };
+    setChatMessages(prev => [...prev, userMessage]);
+    
+    // Simulate AI response (replace with real API call)
+    setIsChatLoading(true);
+    setTimeout(() => {
+      const aiMessage: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'model',
+        content: `I'm here to help you with "${message}". This is a demo response. In production, connect this to the actual AI service.`,
+        timestamp: new Date().toISOString(),
+      };
+      setChatMessages(prev => [...prev, aiMessage]);
+      setIsChatLoading(false);
+    }, 1000);
+  };
+
   // Get energy status
   const getEnergyStatus = (level: string) => {
     switch (level) {
@@ -123,7 +153,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   const energyStatus = getEnergyStatus(studentData.energyLevel);
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-bg-dark">
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
@@ -271,9 +301,23 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       <ChatDrawer
         isOpen={isChatOpen}
         onClose={handleCloseChat}
+        messages={chatMessages}
+        isLoading={isChatLoading}
+        onSendMessage={handleSendChatMessage}
+        suggestedPrompts={[
+          `Help me with ${studentData.subjects[0]?.name || 'my studies'}`,
+          'How can I improve my study habits?',
+          'Create a study plan for this week',
+          'I need motivation to stay focused',
+        ]}
         studentName={studentData.name}
         grade={studentData.grade}
         lastCheckIn="2 hours ago"
+        contextBullets={[
+          `Active goals: ${studentData.goals.map(g => g.title).join(', ') || 'Not set'}`,
+          `Focus subjects: ${studentData.subjects.slice(0, 2).map(s => s.name).join(', ')}`,
+          `Study hours this week: ${studentData.avgStudyHours}h avg`,
+        ]}
       />
     </div>
   );
