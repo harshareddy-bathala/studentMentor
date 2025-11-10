@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { StudentProfile, DailyCheckIn, ActivityLog, Homework, Test } from '../types';
 import { analyzeMoodPatterns, calculateAcademicMetrics } from '../utils/aiHelpers';
-import PremiumDashboard from './dashboard/PremiumDashboard';
+import DashboardContent from './dashboard/DashboardContent';
 
 interface DashboardProps {
   profile: StudentProfile;
@@ -110,7 +110,7 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, checkIns, activities, ho
   }, [profile, checkIns, academicMetrics, homework, tests, activities]);
 
   return (
-    <PremiumDashboard
+    <DashboardContent
       studentData={dashboardData}
       onOpenChat={() => console.log('Open chat')}
       onAddGoal={() => console.log('Add goal')}

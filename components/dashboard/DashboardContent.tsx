@@ -54,7 +54,7 @@ interface StudentData {
   goals: any[];
 }
 
-interface PremiumDashboardProps {
+interface DashboardContentProps {
   studentData: StudentData;
   // Callbacks for backend integration
   onOpenChat?: () => void;
@@ -64,7 +64,7 @@ interface PremiumDashboardProps {
   onToggleTeacherMode?: () => void;
 }
 
-export const PremiumDashboard: React.FC<PremiumDashboardProps> = ({
+export const DashboardContent: React.FC<DashboardContentProps> = ({
   studentData,
   onOpenChat,
   onAddGoal,
@@ -279,4 +279,4 @@ export const PremiumDashboard: React.FC<PremiumDashboardProps> = ({
   );
 };
 
-export default PremiumDashboard;
+export default DashboardContent;
