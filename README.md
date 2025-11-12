@@ -134,35 +134,70 @@ Student Mentor AI is more than just a chatbot—it's a comprehensive personal gu
 
 ## 📁 Project Structure
 
+### Current Structure
 ```
 student-mentor-ai/
-├── components/
-│   ├── Login.tsx                # Authentication UI
-│   ├── Onboarding.tsx          # 6-step profile creation
-│   ├── Dashboard.tsx            # Progress visualization
-│   ├── GoalsEditor.tsx          # Dynamic goals management
-│   ├── HomeworkList.tsx         # Homework tracking
-│   ├── TestsList.tsx            # Test management
-│   ├── PeerChat.tsx             # Peer/teacher messaging
-│   ├── Chat.tsx                 # AI mentor with alerts
-│   ├── DailyCheckIn.tsx         # Daily progress tracker
-│   ├── TeacherAlerts.tsx        # Alert display
-│   └── TeacherReport.tsx        # Comprehensive reports
+├── components/             # React components
+│   ├── chat/              # Chat-related components
+│   ├── dashboard/         # Dashboard components
+│   ├── Login.tsx
+│   ├── Onboarding.tsx
+│   ├── Dashboard.tsx
+│   ├── GoalsEditor.tsx
+│   ├── HomeworkList.tsx
+│   ├── TestsList.tsx
+│   ├── PeerChat.tsx
+│   ├── Chat.tsx
+│   ├── DailyCheckIn.tsx
+│   ├── TeacherAlerts.tsx
+│   └── TeacherReport.tsx
 ├── utils/
-│   └── aiHelpers.ts             # AI prompting & analytics
-├── types.ts                     # 15+ TypeScript interfaces
-├── authTypes.ts                 # Authentication models
-├── App.tsx                      # Main app with routing
-└── vite.config.ts              # Build configuration
+│   └── aiHelpers.ts       # AI prompting & analytics
+├── tests/                  # Test files
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration tests
+│   └── setup.ts           # Test configuration
+├── types.ts               # TypeScript type definitions
+├── authTypes.ts           # Authentication types
+├── App.tsx                # Main application
+├── CONTRIBUTING.md        # Contribution guidelines
+├── SETUP_INSTRUCTIONS.md  # Development setup guide
+└── RESTRUCTURING_GUIDE.md # Architecture guide
 ```
+
+### Recommended Future Structure
+
+We're planning to reorganize into a feature-based architecture for better scalability:
+
+```
+src/
+├── features/              # Feature modules
+│   ├── auth/
+│   ├── dashboard/
+│   ├── chat/
+│   └── ...
+├── ui/                    # Shared UI components
+│   ├── Button/
+│   ├── Card/
+│   ├── Input/
+│   └── ...
+├── common/                # Shared utilities
+│   ├── hooks/
+│   ├── utils/
+│   └── constants/
+└── types/                 # TypeScript types
+```
+
+📖 **See [RESTRUCTURING_GUIDE.md](./RESTRUCTURING_GUIDE.md) for detailed architecture plans**
 
 ## 🛠️ Setup Instructions
 
 ### Prerequisites
 - Node.js (v18 or higher)
+- npm (v9 or higher)
 - Gemini API Key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 
-### Installation
+### Quick Start
 
 1. **Clone or navigate to the project**:
    ```bash
@@ -187,7 +222,31 @@ student-mentor-ai/
    ```
 
 5. **Open in browser**:
-   Navigate to `http://localhost:3000`
+   Navigate to `http://localhost:5173`
+
+### Development Setup (For Contributors)
+
+For a complete development environment with linting, formatting, and testing:
+
+1. **Install development dependencies**:
+   ```bash
+   npm install --save-dev eslint prettier husky lint-staged @vitest/coverage-v8
+   ```
+
+2. **Initialize Git hooks**:
+   ```bash
+   npx husky install
+   ```
+
+3. **Run quality checks**:
+   ```bash
+   npm run lint        # Check for linting errors
+   npm run format      # Format code with Prettier
+   npm run test        # Run tests
+   npm run type-check  # Check TypeScript types
+   ```
+
+📖 **See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md) for detailed setup guide**
 
 ## 🎯 Usage Guide
 
@@ -298,7 +357,41 @@ Follow [Google Cloud Run deployment guide](https://cloud.google.com/run/docs/qui
 
 ## 🤝 Contributing
 
-This is a hackathon MVP. See "Upcoming Features" section below for planned enhancements.
+We welcome contributions! This project follows best practices for code quality and maintainability.
+
+### How to Contribute
+
+1. **Read the guidelines**: Check [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines
+2. **Setup your environment**: Follow [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
+3. **Understand the structure**: See [RESTRUCTURING_GUIDE.md](./RESTRUCTURING_GUIDE.md) for architecture
+4. **Pick an issue**: Look for issues labeled `good first issue` or `help wanted`
+5. **Make your changes**: Follow the code style and testing requirements
+6. **Submit a PR**: Create a pull request with a clear description
+
+### Development Commands
+
+```bash
+npm run dev            # Start development server
+npm run build          # Build for production
+npm run preview        # Preview production build
+npm run test           # Run tests
+npm run test:ui        # Run tests with UI
+npm run test:coverage  # Generate coverage report
+npm run lint           # Check for linting errors
+npm run lint:fix       # Fix linting errors
+npm run format         # Format all files
+npm run type-check     # Check TypeScript types
+```
+
+### Code Quality
+
+- **ESLint** for code linting
+- **Prettier** for code formatting
+- **Husky** for pre-commit hooks
+- **Vitest** for testing
+- **TypeScript** for type safety
+
+All contributions must pass linting, formatting, type checking, and tests before merging.
 
 ## 🔮 Upcoming Features
 
