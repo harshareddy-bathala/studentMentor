@@ -22,11 +22,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
-      '@/ui': path.resolve(__dirname, './ui'),
-      '@/features': path.resolve(__dirname, './features'),
-      '@/utils': path.resolve(__dirname, './utils'),
-      '@/types': path.resolve(__dirname, './types'),
+      '@': path.resolve(__dirname, './src'),
+      '@/ui': path.resolve(__dirname, './src/ui'),
+      '@/features': path.resolve(__dirname, './src/features'),
+      '@/common': path.resolve(__dirname, './src/common'),
+      '@/types': path.resolve(__dirname, './src/types'),
     },
   },
 });

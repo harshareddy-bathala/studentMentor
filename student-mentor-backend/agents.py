@@ -6,12 +6,14 @@ from google.adk.models import GeminiModel
 
 from memory import memory_bank, session_service
 from tools import (
-    add_daily_checkin,
-    add_homework,
+    create_assignment,
     generate_teacher_report,
-    get_goals,
-    get_homework,
+    get_assignments_for_student,
+    get_student_profile,
+    record_daily_checkin,
     register_analytics_runner,
+    save_student_profile_data,
+    update_student_goals,
 )
 
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -25,10 +27,10 @@ model = GeminiModel(api_key=GEMINI_API_KEY, model_name=GEMINI_MODEL)
 academic_agent = Agent(
     name="AcademicAgent",
     instructions=(
-        "You are an academic assistant. You help students manage homework, track "
+        "You are an academic assistant. You help students manage assignments, track "
         "tests, and find study materials using your tools."
     ),
-    tools=[get_homework, add_homework],
+    tools=[get_assignments_for_student, create_assignment],
     model=model,
 )
 
@@ -38,7 +40,7 @@ wellness_agent = Agent(
         "You are a wellness coach. You process daily check-ins, track mood and "
         "sleep, and provide encouragement."
     ),
-    tools=[add_daily_checkin],
+    tools=[record_daily_checkin],
     model=model,
     memory_bank=memory_bank,
 )
@@ -49,8 +51,21 @@ goal_agent = Agent(
         "You are a career and goals coach. You help students set, update, and "
         "track their personal, academic, and career aspirations."
     ),
-    tools=[get_goals],
+    tools=[get_student_profile, update_student_goals],
     model=model,
+)
+
+onboarding_agent = Agent(
+    name="OnboardingAgent",
+    instructions=(
+        "You are a friendly and engaging school guide. Your job is to onboard new students. "
+        "First, you must ask for their first name and class. After that, you will ask a series "
+        "of questions to understand their goals, interests, and challenges. You must tailor "
+        "your follow-up questions based on their previous answers to make it feel like a natural conversation."
+    ),
+    tools=[save_student_profile_data],
+    model=model,
+    memory_bank=memory_bank,
 )
 
 analytics_agent = Agent(

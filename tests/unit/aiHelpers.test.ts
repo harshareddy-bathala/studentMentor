@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { 
   generateMentorSystemInstruction,
   generateInsights
-} from '../../utils/aiHelpers';
-import { StudentProfile, DailyCheckIn } from '../../types';
+} from '@/common/utils/aiHelpers';
+import { StudentProfile, DailyCheckIn } from '@/types';
 
 describe('AI Helpers', () => {
   const mockProfile: StudentProfile = {

@@ -1,0 +1,570 @@
+import React, { useState } from 'react';
+import { type StudentProfile } from '@/types';
+
+interface OnboardingProps {
+  onComplete: (profile: StudentProfile) => void;
+}
+
+const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+  const [step, setStep] = useState(1);
+  const [error, setError] = useState('');
+
+  // Step 1: Basic Info
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+  const [grade, setGrade] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | 'other' | 'prefer-not-to-say'>('prefer-not-to-say');
+
+  // Step 2: Academic
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [subjectInput, setSubjectInput] = useState('');
+  const [academicGoals, setAcademicGoals] = useState('');
+  const [learningStyle, setLearningStyle] = useState<'visual' | 'auditory' | 'kinesthetic' | 'reading-writing'>('visual');
+
+  // Step 3: Aspirations
+  const [careerAspirations, setCareerAspirations] = useState('');
+  const [dreamJob, setDreamJob] = useState('');
+  const [roleModels, setRoleModels] = useState('');
+
+  // Step 4: Interests & Hobbies
+  const [interests, setInterests] = useState<string[]>([]);
+  const [interestInput, setInterestInput] = useState('');
+  const [hobbies, setHobbies] = useState<string[]>([]);
+  const [hobbyInput, setHobbyInput] = useState('');
+
+  // Step 5: Sports & Physical
+  const [sportsActivities, setSportsActivities] = useState<string[]>([]);
+  const [sportInput, setSportInput] = useState('');
+  const [fitnessGoals, setFitnessGoals] = useState('');
+
+  // Step 6: Challenges
+  const [academicChallenges, setAcademicChallenges] = useState<string[]>([]);
+  const [academicChallengeInput, setAcademicChallengeInput] = useState('');
+  const [personalChallenges, setPersonalChallenges] = useState<string[]>([]);
+  const [personalChallengeInput, setPersonalChallengeInput] = useState('');
+  const [mentalHealthConcerns, setMentalHealthConcerns] = useState('');
+
+  const totalSteps = 6;
+
+  const addItem = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    inputSetter: React.Dispatch<React.SetStateAction<string>>,
+  ) => {
+    if (value.trim()) {
+      setter((prev) => [...prev, value.trim()]);
+      inputSetter('');
+    }
+  };
+
+  const removeItem = (index: number, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setter((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const validateStep = (currentStep: number): boolean => {
+    setError('');
+    switch (currentStep) {
+      case 1:
+        if (!name.trim()) {
+          setError('Please enter your name.');
+          return false;
+        }
+        const ageNum = parseInt(age, 10);
+        if (Number.isNaN(ageNum) || ageNum < 5 || ageNum > 25) {
+          setError('Please enter a valid age between 5 and 25.');
+          return false;
+        }
+        if (!grade.trim()) {
+          setError('Please enter your grade/class.');
+          return false;
+        }
+        return true;
+      case 2:
+        if (subjects.length === 0) {
+          setError('Please add at least one subject you study.');
+          return false;
+        }
+        if (!academicGoals.trim()) {
+          setError('Please share your academic goals.');
+          return false;
+        }
+        return true;
+      case 3:
+        if (!careerAspirations.trim() || !dreamJob.trim()) {
+          setError('Please tell us about your career aspirations and dream job.');
+          return false;
+        }
+        return true;
+      case 4:
+        if (interests.length === 0 && hobbies.length === 0) {
+          setError('Please add at least one interest or hobby.');
+          return false;
+        }
+        return true;
+      case 5:
+        // Sports is optional
+        return true;
+      case 6:
+        if (academicChallenges.length === 0 && personalChallenges.length === 0) {
+          setError('Please share at least one challenge you face (academic or personal).');
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      if (step < totalSteps) {
+        setStep(step + 1);
+      } else {
+        handleSubmit();
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      setError('');
+    }
+  };
+
+  const handleSubmit = () => {
+    const profile: StudentProfile = {
+      id: `student-${Date.now()}`,
+      name: name.trim(),
+      age: parseInt(age, 10),
+      grade: grade.trim(),
+      gender,
+      subjects,
+      academicGoals: academicGoals.trim(),
+      learningStyle,
+      careerAspirations: careerAspirations.trim(),
+      dreamJob: dreamJob.trim(),
+      roleModels: roleModels.trim() || undefined,
+      interests,
+      hobbies,
+      sportsActivities,
+      fitnessGoals: fitnessGoals.trim() || undefined,
+      academicChallenges,
+      personalChallenges,
+      mentalHealthConcerns: mentalHealthConcerns.trim() || undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    onComplete(profile);
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Let's start with the basics</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What's your name?</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., Alex"
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">How old are you?</label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="e.g., 15"
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What grade/class are you in?</label>
+              <input
+                type="text"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+                placeholder="e.g., 10th Grade"
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Gender (optional)</label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value as any)}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                <option value="prefer-not-to-say">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Your Academic Journey</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What subjects are you studying?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={subjectInput}
+                  onChange={(e) => setSubjectInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' && (e.preventDefault(), addItem(subjectInput, setSubjects, setSubjectInput))
+                  }
+                  placeholder="e.g., Mathematics"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(subjectInput, setSubjects, setSubjectInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {subjects.map((subject, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-sky-600/30 text-sky-200 rounded-full text-sm flex items-center gap-2">
+                    {subject}
+                    <button onClick={() => removeItem(idx, setSubjects)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What are your academic goals?</label>
+              <textarea
+                value={academicGoals}
+                onChange={(e) => setAcademicGoals(e.target.value)}
+                placeholder="e.g., Score above 90% in finals, improve in Science"
+                rows={3}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Your learning style</label>
+              <select
+                value={learningStyle}
+                onChange={(e) => setLearningStyle(e.target.value as any)}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                <option value="visual">Visual (diagrams, images)</option>
+                <option value="auditory">Auditory (listening, discussion)</option>
+                <option value="kinesthetic">Kinesthetic (hands-on, practice)</option>
+                <option value="reading-writing">Reading-Writing (notes, reading)</option>
+              </select>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Your Future Aspirations</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What do you aspire to become?</label>
+              <textarea
+                value={careerAspirations}
+                onChange={(e) => setCareerAspirations(e.target.value)}
+                placeholder="e.g., I want to work in technology and create innovative solutions"
+                rows={3}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What's your dream job?</label>
+              <input
+                type="text"
+                value={dreamJob}
+                onChange={(e) => setDreamJob(e.target.value)}
+                placeholder="e.g., Software Engineer, Doctor, Teacher"
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Who are your role models? (optional)</label>
+              <input
+                type="text"
+                value={roleModels}
+                onChange={(e) => setRoleModels(e.target.value)}
+                placeholder="e.g., Elon Musk, Marie Curie"
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Interests & Hobbies</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What are your interests?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={interestInput}
+                  onChange={(e) => setInterestInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' && (e.preventDefault(), addItem(interestInput, setInterests, setInterestInput))
+                  }
+                  placeholder="e.g., Coding, Reading, Music"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(interestInput, setInterests, setInterestInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {interests.map((interest, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-purple-600/30 text-purple-200 rounded-full text-sm flex items-center gap-2">
+                    {interest}
+                    <button onClick={() => removeItem(idx, setInterests)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What are your hobbies?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={hobbyInput}
+                  onChange={(e) => setHobbyInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addItem(hobbyInput, setHobbies, setHobbyInput))}
+                  placeholder="e.g., Photography, Gaming"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(hobbyInput, setHobbies, setHobbyInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {hobbies.map((hobby, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-purple-600/30 text-purple-200 rounded-full text-sm flex items-center gap-2">
+                    {hobby}
+                    <button onClick={() => removeItem(idx, setHobbies)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Sports & Physical Activities</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">What sports or physical activities do you do?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sportInput}
+                  onChange={(e) => setSportInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addItem(sportInput, setSportsActivities, setSportInput))}
+                  placeholder="e.g., Basketball, Yoga, Swimming"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(sportInput, setSportsActivities, setSportInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {sportsActivities.map((sport, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-green-600/30 text-green-200 rounded-full text-sm flex items-center gap-2">
+                    {sport}
+                    <button onClick={() => removeItem(idx, setSportsActivities)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Fitness goals (optional)</label>
+              <textarea
+                value={fitnessGoals}
+                onChange={(e) => setFitnessGoals(e.target.value)}
+                placeholder="e.g., Get stronger, improve stamina, lose weight"
+                rows={2}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+              />
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-sky-300">Understanding Your Challenges</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Academic challenges</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={academicChallengeInput}
+                  onChange={(e) => setAcademicChallengeInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' &&
+                    (e.preventDefault(), addItem(academicChallengeInput, setAcademicChallenges, setAcademicChallengeInput))
+                  }
+                  placeholder="e.g., Difficulty in Math, Time management"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(academicChallengeInput, setAcademicChallenges, setAcademicChallengeInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {academicChallenges.map((challenge, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-orange-600/30 text-orange-200 rounded-full text-sm flex items-center gap-2">
+                    {challenge}
+                    <button onClick={() => removeItem(idx, setAcademicChallenges)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Personal challenges</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={personalChallengeInput}
+                  onChange={(e) => setPersonalChallengeInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' &&
+                    (e.preventDefault(), addItem(personalChallengeInput, setPersonalChallenges, setPersonalChallengeInput))
+                  }
+                  placeholder="e.g., Anxiety, Peer pressure"
+                  className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => addItem(personalChallengeInput, setPersonalChallenges, setPersonalChallengeInput)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 rounded-lg text-white font-medium"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {personalChallenges.map((challenge, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-orange-600/30 text-orange-200 rounded-full text-sm flex items-center gap-2">
+                    {challenge}
+                    <button onClick={() => removeItem(idx, setPersonalChallenges)} className="hover:text-red-400">
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Any mental health concerns? (optional, confidential)
+              </label>
+              <textarea
+                value={mentalHealthConcerns}
+                onChange={(e) => setMentalHealthConcerns(e.target.value)}
+                placeholder="Feel free to share if comfortable..."
+                rows={2}
+                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+              />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900">
+      <div className="w-full max-w-2xl p-8 space-y-6 bg-slate-800 rounded-2xl shadow-2xl shadow-sky-900/50">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-sky-400">Welcome to Your AI Mentor! 🎓</h1>
+          <p className="mt-2 text-slate-400">Let's personalize your learning journey together</p>
+          <div className="mt-4 flex justify-center">
+            <div className="flex gap-2">
+              {Array.from({ length: totalSteps }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-2 w-8 rounded-full transition-colors ${
+                    idx + 1 === step ? 'bg-sky-400' : idx + 1 < step ? 'bg-sky-600' : 'bg-slate-600'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          <p className="mt-2 text-sm text-slate-500">
+            Step {step} of {totalSteps}
+          </p>
+        </div>
+
+        <div className="min-h-[400px]">{renderStep()}</div>
+
+        {error && (
+          <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+            <p className="text-sm text-red-300">{error}</p>
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-4">
+          {step > 1 && (
+            <button
+              onClick={handleBack}
+              className="flex-1 py-3 px-4 border border-slate-600 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 transition-colors"
+            >
+              Back
+            </button>
+          )}
+          <button
+            onClick={handleNext}
+            className="flex-1 py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 transition-colors"
+          >
+            {step === totalSteps ? 'Complete Setup' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Onboarding;

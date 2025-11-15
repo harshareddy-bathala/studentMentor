@@ -7,7 +7,11 @@ memory_bank = MemoryBank(name="student_long_term")
 
 
 def summarize_checkin(data: Dict[str, str]) -> str:
-    return (
-        f"Mood: {data['mood']} | Sleep: {data['sleep_hours']}h | "
-        f"Wins: {data['achievements']}"
-    )
+    feeling = data.get("mood") or data.get("feeling") or "unknown"
+    win = data.get("win") or data.get("achievements") or "none"
+    blocker = data.get("blocker") or data.get("challenges") or "none"
+
+    wins_text = win if isinstance(win, str) else ", ".join(win)
+    blocker_text = blocker if isinstance(blocker, str) else ", ".join(blocker)
+
+    return f"Mood: {feeling} | Win: {wins_text} | Blocker: {blocker_text}"
