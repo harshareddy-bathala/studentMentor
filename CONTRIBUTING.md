@@ -46,7 +46,7 @@ Before you begin, ensure you have the following installed:
 5. **Set up environment variables**:
    Create a `.env.local` file in the root directory:
    ```env
-   VITE_GEMINI_API_KEY=your_api_key_here
+   VITE_MENTOR_BACKEND_URL=http://localhost:8000
    ```
 
 6. **Start the development server**:

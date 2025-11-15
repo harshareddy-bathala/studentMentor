@@ -193,60 +193,71 @@ src/
 ## 🛠️ Setup Instructions
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-- Gemini API Key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- Node.js 18+
+- npm 9+
+- Python 3.11+
+- Google Cloud project with:
+  - Firestore (native mode)
+  - Gemini API access (via Google AI Studio / Vertex AI)
+  - Service account JSON with Firestore + Vertex AI perms
 
-### Quick Start
+### 1. Backend (FastAPI + ADK agents)
 
-1. **Clone or navigate to the project**:
-   ```bash
-   cd student-mentor-ai
-   ```
+```powershell
+cd student-mentor-ai\student-mentor-backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+```
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+Update `.env`:
 
-3. **Configure API Key**:
-   Create a `.env.local` file in the root directory:
-   ```env
-   VITE_GEMINI_API_KEY=your_api_key_here
-   ```
-   Get your free Gemini API key from: https://aistudio.google.com/app/apikey
+```
+GOOGLE_API_KEY=<gemini key>
+GEMINI_MODEL=gemini-1.5-flash
+FIRESTORE_PROJECT_ID=<gcp project id>
+GOOGLE_APPLICATION_CREDENTIALS=<abs path to service-account.json>
+```
 
-4. **Start development server**:
-   ```bash
-   npm run dev
-   ```
+Start the agent hub:
 
-5. **Open in browser**:
-   Navigate to `http://localhost:5173`
+```powershell
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-### Development Setup (For Contributors)
+### 2. Frontend (React + Vite)
 
-For a complete development environment with linting, formatting, and testing:
+```powershell
+cd student-mentor-ai
+npm install
+Copy-Item .env.local.example .env.local -ErrorAction SilentlyContinue
+```
 
-1. **Install development dependencies**:
-   ```bash
-   npm install --save-dev eslint prettier husky lint-staged @vitest/coverage-v8
-   ```
+Edit `.env.local`:
 
-2. **Initialize Git hooks**:
-   ```bash
-   npx husky install
-   ```
+```
+VITE_MENTOR_BACKEND_URL=http://localhost:8000
+```
 
-3. **Run quality checks**:
-   ```bash
-   npm run lint        # Check for linting errors
-   npm run format      # Format code with Prettier
-   npm run test        # Run tests
-   npm run type-check  # Check TypeScript types
-   ```
+Then run Vite:
 
-📖 **See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md) for detailed setup guide**
+```powershell
+npm run dev
+```
+
+Visit `http://localhost:5173` while the backend is online.
+
+### 3. Developer Tooling
+
+```powershell
+npm run lint        # ESLint
+npm run format      # Prettier
+npm run test        # Vitest
+npm run type-check  # tsc --noEmit
+```
+
+📖 **See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md) for linting + CI details**
 
 ## 🎯 Usage Guide
 

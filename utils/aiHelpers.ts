@@ -1,5 +1,19 @@
 import { StudentProfile, DailyCheckIn, ActivityLog, SessionContext } from '../types';
 
+const DEFAULT_BACKEND_URL = import.meta.env.VITE_MENTOR_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
+const SSE_PREFIX = 'data:';
+
+export interface BackendStreamChunk {
+  text: string;
+}
+
+export interface BackendChatClient {
+  mode: 'backend';
+  baseUrl: string;
+  sendMessageStream: (payload: { studentId: string; message: string }) => AsyncGenerator<BackendStreamChunk>;
+  healthcheck: () => Promise<void>;
+}
+
 /**
  * Generate a comprehensive system instruction for the AI mentor
  */
@@ -333,4 +347,82 @@ export function generateInsights(
   });
 
   return { strengths, growthAreas, recommendations };
+}
+
+const normalizeLine = (line: string): string | null => {
+  if (!line.trim()) return null;
+  const cleaned = line.startsWith(SSE_PREFIX) ? line.slice(SSE_PREFIX.length).trim() : line.trim();
+  if (!cleaned || cleaned === '[DONE]') return cleaned === '[DONE]' ? '[DONE]' : null;
+  return cleaned;
+};
+
+const ensureResponseBody = (response: Response): ReadableStream<Uint8Array> => {
+  if (!response.body) {
+    throw new Error('Backend streaming response is missing a body');
+  }
+  return response.body;
+};
+
+export function createBackendChatClient(baseUrl: string = DEFAULT_BACKEND_URL): BackendChatClient {
+  const sanitizedBaseUrl = baseUrl.replace(/\/$/, '');
+
+  return {
+    mode: 'backend',
+    baseUrl: sanitizedBaseUrl,
+    async healthcheck(): Promise<void> {
+      const response = await fetch(`${sanitizedBaseUrl}/health`);
+      if (!response.ok) {
+        throw new Error(`Backend health check failed with status ${response.status}`);
+      }
+    },
+    async *sendMessageStream({ studentId, message }): AsyncGenerator<BackendStreamChunk> {
+      const response = await fetch(`${sanitizedBaseUrl}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ student_id: studentId, message }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Backend error: ${response.status} ${errorText}`);
+      }
+
+      const reader = ensureResponseBody(response).getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          buffer += decoder.decode();
+          if (buffer.trim()) {
+            yield { text: buffer.trim() };
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex = buffer.indexOf('\n');
+        while (newlineIndex !== -1) {
+          const line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+          const normalized = normalizeLine(line);
+          if (normalized === '[DONE]') {
+            return;
+          } else if (normalized) {
+            yield { text: normalized };
+          }
+          newlineIndex = buffer.indexOf('\n');
+        }
+      }
+    },
+  };
+}
+
+export async function pingMentorBackend(baseUrl: string = DEFAULT_BACKEND_URL): Promise<void> {
+  const client = createBackendChatClient(baseUrl);
+  await client.healthcheck();
 }
